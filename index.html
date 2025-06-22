@@ -2,15 +2,19 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
-    <title>超中毒性ツムゲーム</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+    <title>ツムゲーム</title>
     
     <!-- PWA設定 -->
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ツムゲーム">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="manifest.json">
+    
+    <!-- アイコン設定 -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iMjAiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxjaXJjbGUgY3g9IjkwIiBjeT0iOTAiIHI9IjQwIiBmaWxsPSIjZmZlYjNiIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MF9saW5lYXJfMV8xIiB4MT0iMCIgeTE9IjAiIHgyPSIxODAiIHkyPSIxODAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzY2N2VlYSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3NjRiYTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K">
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&display=swap');
@@ -21,134 +25,210 @@
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
         }
         
         body {
-            margin: 0;
-            padding: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-family: 'Fredoka One', cursive;
             color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            overscroll-behavior: none;
             position: fixed;
             width: 100%;
             height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
         }
 
         .game-container {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 15px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-            margin: 10px;
-            width: calc(100% - 20px);
-            max-width: 400px;
-            height: calc(100vh - 20px);
+            flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            padding: 8px;
+            min-height: 0;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
-            flex-shrink: 0;
-        }
-
-        .header h1 {
-            font-size: 20px;
-            margin: 5px 0;
-        }
-
-        .level-badge {
-            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
-            padding: 6px 12px;
+        .top-ui {
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 15px;
-            font-size: 12px;
-            margin: 5px;
-            display: inline-block;
+            padding: 10px;
+            margin-bottom: 8px;
+            backdrop-filter: blur(10px);
         }
 
-        .score-container {
+        .score-timer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 8px 0;
-            font-size: 16px;
+            margin-bottom: 8px;
         }
 
         .score {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
 
         .timer {
             font-size: 16px;
             color: #ffeb3b;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
 
         .timer.urgent {
             color: #ff4757;
-            animation: flash 0.5s ease-in-out infinite alternate;
+            animation: pulse 0.5s ease-in-out infinite alternate;
         }
 
-        @keyframes flash {
-            0% { opacity: 1; }
-            100% { opacity: 0.3; }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
         }
 
-        .combo-meter {
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            padding: 8px;
-            margin: 8px 0;
-            text-align: center;
-        }
-
-        .combo-text {
+        .level-combo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-size: 14px;
-            margin-bottom: 4px;
         }
 
-        .combo-bar {
-            background: rgba(255,255,255,0.2);
-            height: 6px;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .combo-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #4ecdc4);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-            width: 0%;
-        }
-
-        .daily-challenge {
-            background: rgba(255, 0, 150, 0.2);
-            border: 2px solid #ff0096;
-            border-radius: 10px;
-            padding: 8px;
-            margin: 8px 0;
-            text-align: center;
+        .level-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            padding: 4px 10px;
+            border-radius: 12px;
             font-size: 12px;
+        }
+
+        .combo-info {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .game-board {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            margin: 8px 0;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+            padding: 8px;
+            width: 100%;
+            max-width: 380px;
+            aspect-ratio: 6/9;
+        }
+
+        .tsum {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: clamp(14px, 4vw, 20px);
+            transition: all 0.1s ease-out;
+            position: relative;
+            cursor: pointer;
+            will-change: transform;
+        }
+
+        .tsum:active {
+            transform: scale(0.9);
+        }
+
+        .tsum.selected {
+            border-color: #ffeb3b;
+            border-width: 3px;
+            transform: scale(1.15);
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.8);
+            z-index: 10;
+        }
+
+        .tsum.eliminating {
+            animation: pop 0.3s ease-in-out forwards;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .tsum.spawning {
+            animation: spawn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: scale(0);
+        }
+
+        @keyframes spawn {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* ツムの色 */
+        .red { background: linear-gradient(135deg, #ff6b6b, #ee5a52); color: white; }
+        .blue { background: linear-gradient(135deg, #4834d4, #3742fa); color: white; }
+        .green { background: linear-gradient(135deg, #26de81, #20bf6b); color: white; }
+        .yellow { background: linear-gradient(135deg, #fed330, #f7b731); color: #2c2c54; }
+        .purple { background: linear-gradient(135deg, #a55eea, #8854d0); color: white; }
+        .orange { background: linear-gradient(135deg, #fd9644, #f8b500); color: white; }
+        .pink { background: linear-gradient(135deg, #fd79a8, #e84393); color: white; }
+
+        .special {
+            background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700) !important;
+            animation: sparkle 1.5s ease-in-out infinite, rainbow 3s ease-in-out infinite;
+            border-color: #ffd700 !important;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+        }
+
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .chain-line {
+            position: absolute;
+            background: linear-gradient(90deg, #ffeb3b, #ff6b6b);
+            height: 4px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.8;
+        }
+
+        .bottom-ui {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 10px;
+            margin-top: 8px;
+            backdrop-filter: blur(10px);
         }
 
         .power-ups {
             display: flex;
-            justify-content: center;
-            margin: 10px 0;
-            gap: 8px;
-            flex-shrink: 0;
+            justify-content: space-around;
+            margin-bottom: 10px;
         }
 
         .power-up {
@@ -157,121 +237,27 @@
             border-radius: 12px;
             padding: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             font-size: 10px;
-            min-width: 50px;
             text-align: center;
+            min-width: 60px;
             touch-action: manipulation;
         }
 
         .power-up:active {
-            transform: scale(0.95);
+            transform: scale(0.9);
             background: linear-gradient(135deg, #5a67d8, #6b46c1);
         }
 
         .power-up.disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             pointer-events: none;
-        }
-
-        .game-board {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 15px;
-            padding: 8px;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.3);
-            touch-action: none;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .tsum {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            position: absolute;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            transition: all 0.15s ease-out;
-            z-index: 10;
-            touch-action: none;
-            cursor: pointer;
-        }
-
-        .tsum:active {
-            transform: scale(0.95);
-        }
-
-        .tsum.selected {
-            border-color: #ffeb3b;
-            border-width: 3px;
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255, 235, 59, 0.8);
-            z-index: 30;
-        }
-
-        .tsum.eliminating {
-            animation: eliminate 0.4s ease-in-out forwards;
-        }
-
-        @keyframes eliminate {
-            0% { transform: scale(1) rotate(0deg); opacity: 1; }
-            50% { transform: scale(1.2) rotate(180deg); opacity: 0.7; }
-            100% { transform: scale(0) rotate(360deg); opacity: 0; }
-        }
-
-        .tsum.falling {
-            animation: fall 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(-80px) rotate(0deg); }
-            100% { transform: translateY(0) rotate(180deg); }
-        }
-
-        .tsum.red { background: linear-gradient(135deg, #ff6b6b, #ee5a52); color: white; }
-        .tsum.blue { background: linear-gradient(135deg, #4834d4, #3742fa); color: white; }
-        .tsum.green { background: linear-gradient(135deg, #26de81, #20bf6b); color: white; }
-        .tsum.yellow { background: linear-gradient(135deg, #fed330, #f7b731); color: #2c2c54; }
-        .tsum.purple { background: linear-gradient(135deg, #a55eea, #8854d0); color: white; }
-        .tsum.orange { background: linear-gradient(135deg, #fd9644, #f8b500); color: white; }
-        .tsum.pink { background: linear-gradient(135deg, #fd79a8, #e84393); color: white; }
-
-        .tsum.special {
-            background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
-            animation: rainbow 2s ease-in-out infinite, sparkle 1s ease-in-out infinite;
-            border-color: #ffd700;
-        }
-
-        @keyframes rainbow {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-
-        @keyframes sparkle {
-            0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
-            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 1); }
-        }
-
-        .chain-line {
-            position: absolute;
-            background: linear-gradient(90deg, #ffeb3b, #ffd93d);
-            height: 4px;
-            border-radius: 2px;
-            pointer-events: none;
-            z-index: 100;
-            box-shadow: 0 0 8px rgba(255, 235, 59, 0.6);
         }
 
         .controls {
-            margin-top: 15px;
-            text-align: center;
-            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
 
         .btn {
@@ -279,14 +265,15 @@
             border: 2px solid white;
             color: white;
             padding: 12px 20px;
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
             font-size: 14px;
             font-family: 'Fredoka One', cursive;
-            margin: 4px;
             transition: all 0.2s ease;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             touch-action: manipulation;
+            flex: 1;
+            max-width: 120px;
         }
 
         .btn:active {
@@ -294,52 +281,20 @@
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
         }
 
-        .achievements {
-            margin-top: 10px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .achievement {
-            background: rgba(255, 215, 0, 0.2);
-            border: 1px solid #ffd700;
-            border-radius: 12px;
-            padding: 4px 8px;
-            margin: 2px;
-            font-size: 10px;
-            opacity: 0.5;
-            transition: all 0.3s ease;
-        }
-
-        .achievement.unlocked {
-            opacity: 1;
-            animation: achievementPop 0.5s ease-out;
-        }
-
-        @keyframes achievementPop {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .instructions {
-            margin-top: 10px;
-            font-size: 12px;
-            text-align: center;
-            opacity: 0.9;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        .chain-display {
+        .floating-score {
             position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(0,0,0,0.6);
-            border-radius: 8px;
-            padding: 4px 8px;
-            font-size: 12px;
-            z-index: 200;
+            color: #ffeb3b;
+            font-size: 16px;
+            font-weight: bold;
+            animation: floatUp 1s ease-out forwards;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(1.2) translateY(-50px); opacity: 0; }
         }
 
         .notification {
@@ -349,139 +304,186 @@
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, #ff6b6b, #ffd93d);
             padding: 15px 20px;
-            border-radius: 12px;
+            border-radius: 15px;
             font-size: 14px;
-            z-index: 2000;
-            animation: notificationSlide 2s ease-in-out forwards;
+            z-index: 1000;
+            animation: notificationPop 2s ease-in-out forwards;
             max-width: 80%;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        @keyframes notificationSlide {
+        @keyframes notificationPop {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            20% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
-            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            15% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            85% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
         }
 
-        .score-burst {
+        .chain-counter {
             position: absolute;
-            color: #ffeb3b;
-            font-size: 16px;
-            animation: scoreBurst 1s ease-out forwards;
-            pointer-events: none;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
             font-weight: bold;
+            z-index: 50;
         }
 
-        @keyframes scoreBurst {
-            0% { transform: scale(1) translateY(0); opacity: 1; }
-            100% { transform: scale(1.3) translateY(-40px); opacity: 0; }
+        .achievements {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 200;
         }
 
-        /* タッチフィードバック最適化 */
-        .tsum:hover {
-            transform: scale(1.05);
-            border-color: rgba(255, 255, 255, 0.8);
+        .achievement {
+            background: rgba(255, 215, 0, 0.9);
+            color: #2c2c54;
+            border-radius: 8px;
+            padding: 3px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
         }
 
-        /* パフォーマンス最適化 */
-        .game-board * {
-            will-change: transform;
+        .achievement.show {
+            opacity: 1;
+            transform: translateY(0);
+            animation: achievementBounce 0.6s ease-out;
         }
 
-        /* レスポンシブ調整 */
+        @keyframes achievementBounce {
+            0% { transform: translateY(20px) scale(0.8); }
+            50% { transform: translateY(-5px) scale(1.1); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        /* フルスクリーンゲーム向け調整 */
         @media (max-height: 700px) {
-            .game-container {
-                padding: 10px;
+            .top-ui, .bottom-ui {
+                padding: 6px;
             }
             
-            .header h1 {
+            .score {
                 font-size: 18px;
             }
             
-            .daily-challenge,
-            .achievements {
-                display: none;
+            .power-ups {
+                margin-bottom: 6px;
             }
         }
 
-        @media (max-width: 380px) {
+        @media (max-width: 350px) {
             .tsum {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
+                font-size: 14px;
             }
             
-            .game-board {
+            .board-grid {
+                gap: 2px;
                 padding: 6px;
             }
+        }
+
+        /* ローディング画面 */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="header">
-            <h1>🎮 超中毒性ツムゲーム</h1>
-            <div class="level-badge">レベル <span id="level">1</span></div>
-            
-            <div class="score-container">
-                <div class="score">スコア: <span id="score">0</span></div>
-                <div class="timer">残り: <span id="timer">60</span>秒</div>
-            </div>
-            
-            <div class="combo-meter">
-                <div class="combo-text">コンボ: <span id="combo">0</span> 連鎖</div>
-                <div class="combo-bar">
-                    <div class="combo-fill" id="comboFill"></div>
-                </div>
-            </div>
-            
-            <div class="daily-challenge">
-                🏆 今日の挑戦: <span id="dailyChallenge">5000点達成！</span>
-                <div>報酬: ⭐️×3</div>
-            </div>
-        </div>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">🎮 ツムゲーム読み込み中...</div>
+    </div>
 
-        <div class="power-ups">
-            <div class="power-up" onclick="usePowerUp('bomb')" id="bombPower">
-                💣<br>ボム<br><span id="bombCount">3</span>
+    <div class="game-container">
+        <div class="top-ui">
+            <div class="score-timer">
+                <div class="score">スコア: <span id="score">0</span></div>
+                <div class="timer" id="timerDisplay">残り: <span id="timer">60</span>秒</div>
             </div>
-            <div class="power-up" onclick="usePowerUp('rainbow')" id="rainbowPower">
-                🌈<br>虹<br><span id="rainbowCount">2</span>
-            </div>
-            <div class="power-up" onclick="usePowerUp('time')" id="timePower">
-                ⏰<br>時間<br><span id="timeCount">1</span>
+            <div class="level-combo">
+                <div class="level-badge">Lv.<span id="level">1</span></div>
+                <div class="combo-info"><span id="combo">0</span>コンボ</div>
             </div>
         </div>
 
         <div class="game-board" id="gameBoard">
-            <div class="chain-display" id="chainDisplay" style="display: none;">
-                チェーン: <span id="chainCount">0</span>
+            <div class="chain-counter" id="chainCounter" style="display: none;">
+                <span id="chainCount">0</span>チェーン
             </div>
+            <div class="board-grid" id="boardGrid"></div>
         </div>
 
-        <div class="controls">
-            <button class="btn" onclick="startGame()">ゲーム開始</button>
-            <button class="btn" onclick="resetGame()">リセット</button>
-        </div>
-
-        <div class="achievements" id="achievements">
-            <div class="achievement" data-achievement="firstPlay">初プレイ 🎮</div>
-            <div class="achievement" data-achievement="score1000">1000点 ⭐</div>
-            <div class="achievement" data-achievement="score5000">5000点 🌟</div>
-            <div class="achievement" data-achievement="combo10">10コンボ 🔥</div>
-            <div class="achievement" data-achievement="speedDemon">高速プレイ ⚡</div>
-            <div class="achievement" data-achievement="perfectGame">完璧ゲーム 👑</div>
-        </div>
-
-        <div class="instructions">
-            指でドラッグして同じ色のツムを繋げよう！<br>
-            💎 特殊ツムでボーナス点！ 🔥 コンボでスコア倍増！
+        <div class="bottom-ui">
+            <div class="power-ups">
+                <div class="power-up" onclick="usePowerUp('bomb')" id="bombPower">
+                    💣<br>ボム<br><span id="bombCount">3</span>
+                </div>
+                <div class="power-up" onclick="usePowerUp('rainbow')" id="rainbowPower">
+                    🌈<br>虹<br><span id="rainbowCount">2</span>
+                </div>
+                <div class="power-up" onclick="usePowerUp('time')" id="timePower">
+                    ⏰<br>時間<br><span id="timeCount">1</span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" onclick="startGame()" id="startBtn">開始</button>
+                <button class="btn" onclick="resetGame()">リセット</button>
+            </div>
         </div>
     </div>
 
+    <div class="achievements" id="achievementDisplay"></div>
+
     <script>
+        // ゲーム状態
         let score = 0;
         let timeLeft = 60;
         let gameRunning = false;
@@ -494,10 +496,10 @@
         let chainCount = 0;
         let powerUps = { bomb: 3, rainbow: 2, time: 1 };
         let achievements = new Set();
-        let dailyChallengeCompleted = false;
         let gameStartTime = 0;
         let perfectGame = true;
         let currentTouch = null;
+        let boardSize = { rows: 9, cols: 6 };
         
         const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink'];
         const colorEmojis = { 
@@ -505,62 +507,59 @@
             purple: '🟣', orange: '🟠', pink: '🩷'
         };
 
-        const bonusMessages = [
-            "🎉 ボーナス！ +500点！",
-            "⭐ 素晴らしい！ +300点！",
-            "🔥 熱い！ +200点！",
-            "💎 キラキラ！ +1000点！",
-            "🚀 ロケット！ +800点！"
+        const achievementList = [
+            { id: 'firstPlay', name: '初プレイ', icon: '🎮' },
+            { id: 'score1000', name: '1000点達成', icon: '⭐' },
+            { id: 'score5000', name: '5000点達成', icon: '🌟' },
+            { id: 'combo10', name: '10コンボ', icon: '🔥' },
+            { id: 'speedDemon', name: '高速クリア', icon: '⚡' },
+            { id: 'perfectGame', name: '完璧プレイ', icon: '👑' }
         ];
 
-        // モバイル最適化: タッチイベント処理
-        function createTsum(x, y, color, isSpecial = false) {
+        // 初期化とローディング
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                initializeBoard();
+                updatePowerUps();
+                loadAchievements();
+                showNotification('🎮 タッチでツムを繋げよう！');
+            }, 1500);
+        });
+
+        // ボード初期化
+        function initializeBoard() {
+            const boardGrid = document.getElementById('boardGrid');
+            boardGrid.innerHTML = '';
+            tsums = [];
+
+            for (let i = 0; i < boardSize.rows * boardSize.cols; i++) {
+                const color = colors[Math.floor(Math.random() * Math.min(5 + level, colors.length))];
+                const isSpecial = Math.random() < 0.04 + (level * 0.01);
+                const tsum = createTsum(color, isSpecial, i);
+                boardGrid.appendChild(tsum);
+                tsums.push(tsum);
+            }
+        }
+
+        // ツム作成
+        function createTsum(color, isSpecial = false, index) {
             const tsum = document.createElement('div');
             tsum.className = `tsum ${color}${isSpecial ? ' special' : ''}`;
-            tsum.style.left = x + 'px';
-            tsum.style.top = y + 'px';
             tsum.textContent = isSpecial ? '💎' : colorEmojis[color];
             tsum.dataset.color = color;
             tsum.dataset.special = isSpecial;
+            tsum.dataset.index = index;
             tsum.dataset.id = Date.now() + Math.random();
 
-            // タッチイベント優先、マウスイベントは補助
+            // タッチイベント
             tsum.addEventListener('touchstart', handleTouchStart, { passive: false });
-            tsum.addEventListener('mousedown', startDrag);
+            tsum.addEventListener('mousedown', handleMouseStart, { passive: false });
 
             return tsum;
         }
 
-        function initializeBoard() {
-            const board = document.getElementById('gameBoard');
-            board.innerHTML = '<div class="chain-display" id="chainDisplay" style="display: none;">チェーン: <span id="chainCount">0</span></div>';
-            tsums = [];
-
-            // モバイル向けグリッド調整
-            const isMobile = window.innerWidth < 400;
-            const cols = 6;
-            const rows = isMobile ? 9 : 8;
-            const tsumSize = isMobile ? 40 : 44;
-            const spacing = isMobile ? 42 : 46;
-
-            for (let row = 0; row < rows; row++) {
-                for (let col = 0; col < cols; col++) {
-                    const x = col * spacing + 8;
-                    const y = row * spacing + 8;
-                    const color = colors[Math.floor(Math.random() * Math.min(5 + level, colors.length))];
-                    const isSpecial = Math.random() < 0.05 + (level * 0.01);
-                    const tsum = createTsum(x, y, color, isSpecial);
-                    
-                    tsum.classList.add('falling');
-                    setTimeout(() => tsum.classList.remove('falling'), 600);
-                    
-                    board.appendChild(tsum);
-                    tsums.push(tsum);
-                }
-            }
-        }
-
-        // 改良されたタッチハンドリング
+        // タッチ開始
         function handleTouchStart(e) {
             if (!gameRunning) return;
             
@@ -568,15 +567,17 @@
             e.stopPropagation();
             
             currentTouch = e.touches[0];
-            startDrag({ target: e.target });
+            startDrag(e.target);
             
-            // タッチムーブとタッチエンドのリスナーを動的に追加
+            // グローバルタッチイベント
             document.addEventListener('touchmove', handleTouchMove, { passive: false });
             document.addEventListener('touchend', handleTouchEnd, { passive: false });
+            document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
         }
 
+        // タッチ移動
         function handleTouchMove(e) {
-            if (!isDragging || !gameRunning || !currentTouch) return;
+            if (!isDragging || !gameRunning) return;
             
             e.preventDefault();
             
@@ -584,88 +585,134 @@
             const element = document.elementFromPoint(touch.clientX, touch.clientY);
             
             if (element && element.classList.contains('tsum')) {
-                continueDrag({ target: element });
+                continueDrag(element);
             }
         }
 
+        // タッチ終了
         function handleTouchEnd(e) {
             e.preventDefault();
             
-            // リスナーを削除
             document.removeEventListener('touchmove', handleTouchMove);
             document.removeEventListener('touchend', handleTouchEnd);
+            document.removeEventListener('touchcancel', handleTouchEnd);
             
             currentTouch = null;
             endDrag();
         }
 
-        function startDrag(e) {
-            if (!gameRunning) return;
+        // マウス開始（PC用）
+        function handleMouseStart(e) {
+            if (!gameRunning || currentTouch) return;
             
-            isDragging = true;
-            selectedTsums = [e.target];
-            e.target.classList.add('selected');
-            chainCount = 1;
-            updateChainDisplay();
+            e.preventDefault();
+            startDrag(e.target);
             
-            // 触覚フィードバック（可能な場合）
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseEnd);
+        }
+
+        function handleMouseMove(e) {
+            if (!isDragging || currentTouch) return;
+            
+            const element = document.elementFromPoint(e.clientX, e.clientY);
+            if (element && element.classList.contains('tsum')) {
+                continueDrag(element);
             }
         }
 
-        function continueDrag(e) {
+        function handleMouseEnd(e) {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseEnd);
+            
+            if (!currentTouch) {
+                endDrag();
+            }
+        }
+
+        // ドラッグ開始
+        function startDrag(target) {
+            if (!gameRunning) return;
+            
+            isDragging = true;
+            selectedTsums = [target];
+            target.classList.add('selected');
+            chainCount = 1;
+            updateChainDisplay();
+            
+            // 触覚フィードバック
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        }
+
+        // ドラッグ継続
+        function continueDrag(target) {
             if (!isDragging || !gameRunning) return;
             
-            const tsum = e.target;
             const lastSelected = selectedTsums[selectedTsums.length - 1];
             
-            if (tsum === lastSelected) return;
+            if (target === lastSelected) return;
             
-            if (tsum.dataset.color === lastSelected.dataset.color && 
-                !selectedTsums.includes(tsum) && 
-                isAdjacent(lastSelected, tsum)) {
-                selectedTsums.push(tsum);
-                tsum.classList.add('selected');
+            // 既に選択済みの場合、戻る処理
+            const existingIndex = selectedTsums.indexOf(target);
+            if (existingIndex !== -1 && existingIndex === selectedTsums.length - 2) {
+                // 1つ前に戻る
+                const removed = selectedTsums.pop();
+                removed.classList.remove('selected');
+                chainCount--;
+                updateChainDisplay();
+                clearChainLines();
+                drawChainLines();
+                return;
+            }
+            
+            if (target.dataset.color === lastSelected.dataset.color && 
+                !selectedTsums.includes(target) && 
+                isAdjacent(lastSelected, target)) {
+                selectedTsums.push(target);
+                target.classList.add('selected');
                 chainCount++;
                 updateChainDisplay();
-                drawChainLine();
+                drawChainLines();
                 
-                // 軽い振動フィードバック
+                // 軽い振動
                 if (navigator.vibrate) {
-                    navigator.vibrate(20);
+                    navigator.vibrate(15);
                 }
             }
         }
 
+        // ドラッグ終了
         function endDrag() {
             if (!isDragging || !gameRunning) return;
             
             isDragging = false;
-            document.getElementById('chainDisplay').style.display = 'none';
+            document.getElementById('chainCounter').style.display = 'none';
             clearChainLines();
             
             if (selectedTsums.length >= 3) {
                 eliminateTsums();
-                let points = calculatePoints();
+                const points = calculatePoints();
                 
                 // ランダムボーナス
-                if (Math.random() < 0.15) {
-                    const bonus = Math.floor(Math.random() * 1000) + 200;
-                    points += bonus;
-                    showNotification(bonusMessages[Math.floor(Math.random() * bonusMessages.length)]);
+                let finalPoints = points;
+                if (Math.random() < 0.12) {
+                    const bonus = Math.floor(Math.random() * 800) + 200;
+                    finalPoints += bonus;
+                    showNotification(`🎁 ボーナス！ +${bonus}点！`);
                 }
                 
-                addScore(points);
+                addScore(finalPoints);
                 updateCombo();
                 checkAchievements();
                 
-                // 強い振動フィードバック
+                // 強い振動
                 if (navigator.vibrate) {
-                    navigator.vibrate([100, 50, 100]);
+                    navigator.vibrate([80, 40, 80]);
                 }
                 
-                if (score > level * 2000) {
+                if (score > level * 1500) {
                     levelUp();
                 }
             } else {
@@ -677,7 +724,24 @@
             clearSelection();
         }
 
-        function drawChainLine() {
+        // 隣接判定
+        function isAdjacent(tsum1, tsum2) {
+            const index1 = parseInt(tsum1.dataset.index);
+            const index2 = parseInt(tsum2.dataset.index);
+            
+            const row1 = Math.floor(index1 / boardSize.cols);
+            const col1 = index1 % boardSize.cols;
+            const row2 = Math.floor(index2 / boardSize.cols);
+            const col2 = index2 % boardSize.cols;
+            
+            const rowDiff = Math.abs(row1 - row2);
+            const colDiff = Math.abs(col1 - col2);
+            
+            return (rowDiff <= 1 && colDiff <= 1) && !(rowDiff === 0 && colDiff === 0);
+        }
+
+        // チェーンライン描画
+        function drawChainLines() {
             clearChainLines();
             
             for (let i = 0; i < selectedTsums.length - 1; i++) {
@@ -686,12 +750,12 @@
                 
                 const rect1 = current.getBoundingClientRect();
                 const rect2 = next.getBoundingClientRect();
-                const board = document.getElementById('gameBoard').getBoundingClientRect();
+                const boardRect = document.getElementById('gameBoard').getBoundingClientRect();
                 
-                const x1 = rect1.left - board.left + 22;
-                const y1 = rect1.top - board.top + 22;
-                const x2 = rect2.left - board.left + 22;
-                const y2 = rect2.top - board.top + 22;
+                const x1 = rect1.left - boardRect.left + rect1.width / 2;
+                const y1 = rect1.top - boardRect.top + rect1.height / 2;
+                const x2 = rect2.left - boardRect.left + rect2.width / 2;
+                const y2 = rect2.top - boardRect.top + rect2.height / 2;
                 
                 const line = document.createElement('div');
                 line.className = 'chain-line';
@@ -713,97 +777,104 @@
             document.querySelectorAll('.chain-line').forEach(line => line.remove());
         }
 
+        // ポイント計算
         function calculatePoints() {
-            let basePoints = selectedTsums.length * 100;
-            let specialBonus = selectedTsums.filter(t => t.dataset.special === 'true').length * 500;
-            let comboMultiplier = Math.floor(combo / 5) + 1;
-            let chainBonus = selectedTsums.length > 7 ? selectedTsums.length * 50 : 0;
+            let basePoints = selectedTsums.length * 120;
+            let specialBonus = selectedTsums.filter(t => t.dataset.special === 'true').length * 600;
+            let comboMultiplier = Math.floor(combo / 3) + 1;
+            let chainBonus = selectedTsums.length > 6 ? selectedTsums.length * 80 : 0;
+            let levelBonus = level * 50;
             
-            return (basePoints + specialBonus + chainBonus) * comboMultiplier;
+            return (basePoints + specialBonus + chainBonus + levelBonus) * comboMultiplier;
         }
 
+        // スコア追加
         function addScore(points) {
             score += points;
             updateScore();
-            showScoreBurst(points);
+            showFloatingScore(points);
         }
 
-        function showScoreBurst(points) {
-            const burst = document.createElement('div');
-            burst.className = 'score-burst';
-            burst.textContent = `+${points}`;
-            burst.style.left = Math.random() * 150 + 'px';
-            burst.style.top = '0px';
+        function showFloatingScore(points) {
+            const floating = document.createElement('div');
+            floating.className = 'floating-score';
+            floating.textContent = `+${points}`;
+            floating.style.left = Math.random() * 200 + 100 + 'px';
+            floating.style.top = '50%';
             
-            document.querySelector('.score').appendChild(burst);
-            setTimeout(() => burst.remove(), 1000);
+            document.getElementById('gameBoard').appendChild(floating);
+            setTimeout(() => floating.remove(), 1000);
+        }
+
+        // ツム消去
+        function eliminateTsums() {
+            selectedTsums.forEach((tsum, index) => {
+                setTimeout(() => {
+                    if (tsum.parentNode) {
+                        tsum.classList.add('eliminating');
+                        setTimeout(() => {
+                            if (tsum.parentNode) {
+                                const newColor = colors[Math.floor(Math.random() * Math.min(5 + level, colors.length))];
+                                const isSpecial = Math.random() < 0.06 + (level * 0.015);
+                                
+                                tsum.className = `tsum ${newColor}${isSpecial ? ' special' : ''} spawning`;
+                                tsum.textContent = isSpecial ? '💎' : colorEmojis[newColor];
+                                tsum.dataset.color = newColor;
+                                tsum.dataset.special = isSpecial;
+                                
+                                setTimeout(() => tsum.classList.remove('spawning'), 400);
+                            }
+                        }, 300);
+                    }
+                }, index * 60);
+            });
+        }
+
+        // 選択クリア
+        function clearSelection() {
+            selectedTsums.forEach(tsum => {
+                if (tsum.parentNode) {
+                    tsum.classList.remove('selected');
+                }
+            });
+            selectedTsums = [];
+            chainCount = 0;
+        }
+
+        // UI更新
+        function updateScore() {
+            document.getElementById('score').textContent = score.toLocaleString();
         }
 
         function updateCombo() {
             if (selectedTsums.length >= 3) {
                 combo++;
             }
-            
             document.getElementById('combo').textContent = combo;
-            const comboFill = document.getElementById('comboFill');
-            const percentage = Math.min((combo * 10), 100);
-            comboFill.style.width = percentage + '%';
         }
 
-        function levelUp() {
-            level++;
-            timeLeft += 15;
-            showNotification(`🎉 レベル ${level} にアップ！ +15秒ボーナス！`);
-            document.getElementById('level').textContent = level;
+        function updateTimer() {
+            document.getElementById('timer').textContent = timeLeft;
             
-            powerUps.bomb += 1;
-            powerUps.rainbow += level % 2;
-            updatePowerUps();
-        }
-
-        function usePowerUp(type) {
-            if (!gameRunning || powerUps[type] <= 0) return;
-            
-            powerUps[type]--;
-            updatePowerUps();
-            
-            // 振動フィードバック
-            if (navigator.vibrate) {
-                navigator.vibrate(100);
+            const timerDisplay = document.getElementById('timerDisplay');
+            if (timeLeft <= 10) {
+                timerDisplay.classList.add('urgent');
+            } else {
+                timerDisplay.classList.remove('urgent');
             }
             
-            switch(type) {
-                case 'bomb':
-                    const randomTsums = tsums.sort(() => Math.random() - 0.5).slice(0, 12);
-                    randomTsums.forEach(tsum => {
-                        if (tsum.parentNode) {
-                            tsum.classList.add('eliminating');
-                            setTimeout(() => {
-                                if (tsum.parentNode) {
-                                    tsum.parentNode.removeChild(tsum);
-                                }
-                            }, 400);
-                        }
-                    });
-                    addScore(1200);
-                    break;
-                    
-                case 'rainbow':
-                    const dominantColor = colors[Math.floor(Math.random() * colors.length)];
-                    tsums.forEach(tsum => {
-                        if (tsum.parentNode && Math.random() < 0.3) {
-                            tsum.dataset.color = dominantColor;
-                            tsum.className = `tsum ${dominantColor}`;
-                            tsum.textContent = colorEmojis[dominantColor];
-                        }
-                    });
-                    showNotification('🌈 レインボーパワー発動！');
-                    break;
-                    
-                case 'time':
-                    timeLeft += 20;
-                    showNotification('⏰ +20秒追加！');
-                    break;
+            if (timeLeft <= 0) {
+                endGame();
+            } else {
+                timeLeft--;
+            }
+        }
+
+        function updateChainDisplay() {
+            const chainCounter = document.getElementById('chainCounter');
+            if (chainCount > 0) {
+                chainCounter.style.display = 'block';
+                document.getElementById('chainCount').textContent = chainCount;
             }
         }
 
@@ -817,6 +888,89 @@
             document.getElementById('timePower').classList.toggle('disabled', powerUps.time <= 0);
         }
 
+        // レベルアップ
+        function levelUp() {
+            level++;
+            timeLeft += 12;
+            showNotification(`🎉 レベル ${level}！ +12秒ボーナス！`);
+            document.getElementById('level').textContent = level;
+            
+            powerUps.bomb += 1;
+            if (level % 2 === 0) powerUps.rainbow += 1;
+            if (level % 3 === 0) powerUps.time += 1;
+            
+            updatePowerUps();
+            
+            // 強力な振動
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
+            }
+        }
+
+        // パワーアップ使用
+        function usePowerUp(type) {
+            if (!gameRunning || powerUps[type] <= 0) return;
+            
+            powerUps[type]--;
+            updatePowerUps();
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(120);
+            }
+            
+            switch(type) {
+                case 'bomb':
+                    const randomTsums = [...tsums].sort(() => Math.random() - 0.5).slice(0, 15);
+                    randomTsums.forEach((tsum, index) => {
+                        setTimeout(() => {
+                            if (tsum.parentNode) {
+                                tsum.classList.add('eliminating');
+                                setTimeout(() => {
+                                    if (tsum.parentNode) {
+                                        const newColor = colors[Math.floor(Math.random() * colors.length)];
+                                        const isSpecial = Math.random() < 0.1;
+                                        
+                                        tsum.className = `tsum ${newColor}${isSpecial ? ' special' : ''} spawning`;
+                                        tsum.textContent = isSpecial ? '💎' : colorEmojis[newColor];
+                                        tsum.dataset.color = newColor;
+                                        tsum.dataset.special = isSpecial;
+                                        
+                                        setTimeout(() => tsum.classList.remove('spawning'), 400);
+                                    }
+                                }, 300);
+                            }
+                        }, index * 40);
+                    });
+                    addScore(1500);
+                    showNotification('💣 ボム爆発！');
+                    break;
+                    
+                case 'rainbow':
+                    const dominantColor = colors[Math.floor(Math.random() * colors.length)];
+                    tsums.forEach((tsum, index) => {
+                        if (Math.random() < 0.4) {
+                            setTimeout(() => {
+                                tsum.dataset.color = dominantColor;
+                                tsum.className = `tsum ${dominantColor}`;
+                                tsum.textContent = colorEmojis[dominantColor];
+                                tsum.style.transform = 'scale(1.2)';
+                                setTimeout(() => {
+                                    tsum.style.transform = '';
+                                }, 200);
+                            }, index * 20);
+                        }
+                    });
+                    showNotification('🌈 レインボー発動！');
+                    break;
+                    
+                case 'time':
+                    timeLeft += 25;
+                    showNotification('⏰ +25秒追加！');
+                    break;
+            }
+        }
+
+        // 実績チェック
         function checkAchievements() {
             const newAchievements = [];
             
@@ -828,29 +982,44 @@
             }
             if (!achievements.has('score5000') && score >= 5000) {
                 newAchievements.push('score5000');
-                dailyChallengeCompleted = true;
-                showNotification('🏆 デイリーチャレンジ達成！⭐️×3獲得！');
             }
             if (!achievements.has('combo10') && combo >= 10) {
                 newAchievements.push('combo10');
             }
-            if (!achievements.has('speedDemon') && (Date.now() - gameStartTime) < 30000 && score >= 2000) {
+            if (!achievements.has('speedDemon') && (Date.now() - gameStartTime) < 25000 && score >= 3000) {
                 newAchievements.push('speedDemon');
             }
-            if (!achievements.has('perfectGame') && perfectGame && score >= 3000) {
+            if (!achievements.has('perfectGame') && perfectGame && score >= 4000) {
                 newAchievements.push('perfectGame');
             }
             
-            newAchievements.forEach(achievement => {
-                achievements.add(achievement);
-                const elem = document.querySelector(`[data-achievement="${achievement}"]`);
-                if (elem) {
-                    elem.classList.add('unlocked');
+            newAchievements.forEach(achievementId => {
+                achievements.add(achievementId);
+                const achievement = achievementList.find(a => a.id === achievementId);
+                if (achievement) {
+                    showAchievement(achievement);
+                    showNotification(`🏆 ${achievement.icon} ${achievement.name} 達成！`);
                 }
-                showNotification(`🏆 実績解除: ${elem.textContent}！`);
             });
+            
+            saveAchievements();
         }
 
+        function showAchievement(achievement) {
+            const elem = document.createElement('div');
+            elem.className = 'achievement';
+            elem.textContent = `${achievement.icon} ${achievement.name}`;
+            
+            document.getElementById('achievementDisplay').appendChild(elem);
+            
+            setTimeout(() => elem.classList.add('show'), 100);
+            setTimeout(() => {
+                elem.style.opacity = '0';
+                setTimeout(() => elem.remove(), 300);
+            }, 3000);
+        }
+
+        // 通知表示
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.className = 'notification';
@@ -859,92 +1028,7 @@
             setTimeout(() => notification.remove(), 2000);
         }
 
-        function isAdjacent(tsum1, tsum2) {
-            const rect1 = tsum1.getBoundingClientRect();
-            const rect2 = tsum2.getBoundingClientRect();
-            const distance = Math.sqrt(
-                Math.pow(rect1.left - rect2.left, 2) + 
-                Math.pow(rect1.top - rect2.top, 2)
-            );
-            return distance < 65; // モバイル向けに調整
-        }
-
-        function eliminateTsums() {
-            selectedTsums.forEach((tsum, index) => {
-                setTimeout(() => {
-                    if (tsum.parentNode) {
-                        tsum.classList.add('eliminating');
-                        setTimeout(() => {
-                            if (tsum.parentNode) {
-                                tsum.parentNode.removeChild(tsum);
-                            }
-                        }, 400);
-                    }
-                }, index * 40);
-            });
-            
-            setTimeout(() => {
-                fillEmptySpaces();
-            }, selectedTsums.length * 40 + 500);
-        }
-
-        function fillEmptySpaces() {
-            selectedTsums.forEach((removedTsum, index) => {
-                setTimeout(() => {
-                    const x = parseInt(removedTsum.style.left);
-                    const y = parseInt(removedTsum.style.top);
-                    const color = colors[Math.floor(Math.random() * Math.min(5 + level, colors.length))];
-                    const isSpecial = Math.random() < 0.08 + (level * 0.01);
-                    const newTsum = createTsum(x, y, color, isSpecial);
-                    
-                    newTsum.classList.add('falling');
-                    setTimeout(() => newTsum.classList.remove('falling'), 600);
-                    
-                    document.getElementById('gameBoard').appendChild(newTsum);
-                    tsums.push(newTsum);
-                }, index * 80);
-            });
-        }
-
-        function clearSelection() {
-            selectedTsums.forEach(tsum => {
-                if (tsum.parentNode) {
-                    tsum.classList.remove('selected');
-                }
-            });
-            selectedTsums = [];
-            chainCount = 0;
-        }
-
-        function updateScore() {
-            document.getElementById('score').textContent = score.toLocaleString();
-        }
-
-        function updateTimer() {
-            document.getElementById('timer').textContent = timeLeft;
-            
-            const timerElement = document.getElementById('timer');
-            if (timeLeft <= 10) {
-                timerElement.parentElement.classList.add('urgent');
-            } else {
-                timerElement.parentElement.classList.remove('urgent');
-            }
-            
-            if (timeLeft <= 0) {
-                endGame();
-            } else {
-                timeLeft--;
-            }
-        }
-
-        function updateChainDisplay() {
-            const chainDisplay = document.getElementById('chainDisplay');
-            if (chainCount > 0) {
-                chainDisplay.style.display = 'block';
-                document.getElementById('chainCount').textContent = chainCount;
-            }
-        }
-
+        // ゲーム開始
         function startGame() {
             gameRunning = true;
             gameStartTime = Date.now();
@@ -960,71 +1044,88 @@
             updatePowerUps();
             
             document.getElementById('level').textContent = level;
+            document.getElementById('startBtn').textContent = '実行中';
+            document.getElementById('startBtn').style.opacity = '0.5';
             
             initializeBoard();
             
             gameTimer = setInterval(updateTimer, 1000);
             
-            setTimeout(randomEvent, Math.random() * 20000 + 10000);
+            // ランダムイベント開始
+            setTimeout(randomEvent, Math.random() * 15000 + 8000);
             
-            showNotification('🎮 ゲーム開始！頑張って！');
+            showNotification('🚀 ゲーム開始！連鎖を狙え！');
+            
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
         }
 
+        // ランダムイベント
         function randomEvent() {
             if (!gameRunning) return;
             
             const events = [
                 () => {
-                    timeLeft += 10;
-                    showNotification('🎁 サプライズ！+10秒ボーナス！');
+                    timeLeft += 8;
+                    showNotification('🎁 時間ボーナス！+8秒');
                 },
                 () => {
                     powerUps.bomb += 2;
                     updatePowerUps();
-                    showNotification('💣 ボムが2個追加された！');
+                    showNotification('💣 ボム×2 プレゼント！');
                 },
                 () => {
-                    const allTsums = document.querySelectorAll('.tsum');
-                    allTsums.forEach(tsum => {
-                        if (Math.random() < 0.2) {
-                            tsum.dataset.special = 'true';
-                            tsum.classList.add('special');
-                            tsum.textContent = '💎';
-                        }
+                    const specialCount = Math.floor(Math.random() * 8) + 5;
+                    const randomTsums = [...tsums].sort(() => Math.random() - 0.5).slice(0, specialCount);
+                    randomTsums.forEach(tsum => {
+                        tsum.dataset.special = 'true';
+                        tsum.classList.add('special');
+                        tsum.textContent = '💎';
                     });
-                    showNotification('✨ 特殊ツムが大量発生！');
+                    showNotification('✨ 特殊ツム大発生！');
                 },
                 () => {
-                    const bonusScore = Math.floor(Math.random() * 1000) + 500;
+                    const bonusScore = Math.floor(Math.random() * 1200) + 600;
                     addScore(bonusScore);
-                    showNotification(`🌟 ラッキーボーナス！+${bonusScore}点！`);
+                    showNotification(`🌟 ラッキー！+${bonusScore}点！`);
                 }
             ];
             
             const randomEventFunc = events[Math.floor(Math.random() * events.length)];
             randomEventFunc();
             
-            setTimeout(randomEvent, Math.random() * 25000 + 15000);
+            // 次のイベント予約
+            setTimeout(randomEvent, Math.random() * 20000 + 12000);
         }
 
+        // ゲーム終了
         function endGame() {
             gameRunning = false;
             clearInterval(gameTimer);
             clearSelection();
             clearChainLines();
             
+            document.getElementById('startBtn').textContent = '開始';
+            document.getElementById('startBtn').style.opacity = '1';
+            
             checkAchievements();
             
-            let message = `🎮 ゲーム終了！\n`;
-            message += `📊 スコア: ${score.toLocaleString()}点\n`;
-            message += `🎯 レベル: ${level}\n`;
-            message += `🔥 最高コンボ: ${combo}\n`;
+            let message = `🎮 ゲーム終了！\n\n`;
+            message += `📊 最終スコア: ${score.toLocaleString()}点\n`;
+            message += `🎯 到達レベル: ${level}\n`;
+            message += `🔥 最高コンボ: ${combo}連鎖\n`;
+            message += `⭐ 獲得実績: ${achievements.size}個\n\n`;
             
-            if (dailyChallengeCompleted) {
-                message += `🏆 デイリーチャレンジ達成！\n`;
+            if (score >= 5000) {
+                message += `🏆 素晴らしいスコアです！\n`;
+            } else if (score >= 2000) {
+                message += `👍 良いスコアです！\n`;
+            } else {
+                message += `💪 次回はもっと頑張りましょう！\n`;
             }
             
-            message += `\n🔄 もう一度プレイしますか？`;
+            message += `\n🔄 もう一度挑戦しますか？`;
             
             setTimeout(() => {
                 if (confirm(message)) {
@@ -1033,6 +1134,7 @@
             }, 1000);
         }
 
+        // ゲームリセット
         function resetGame() {
             gameRunning = false;
             clearInterval(gameTimer);
@@ -1049,114 +1151,102 @@
             clearChainLines();
             
             document.getElementById('level').textContent = level;
-            document.getElementById('chainDisplay').style.display = 'none';
+            document.getElementById('chainCounter').style.display = 'none';
+            document.getElementById('startBtn').textContent = '開始';
+            document.getElementById('startBtn').style.opacity = '1';
             
-            const board = document.getElementById('gameBoard');
-            board.innerHTML = '<div class="chain-display" id="chainDisplay" style="display: none;">チェーン: <span id="chainCount">0</span></div>';
-            tsums = [];
-        }
-
-        // マウスイベント（PC用補助）
-        document.addEventListener('mouseup', () => {
-            if (isDragging && !currentTouch) {
-                endDrag();
-            }
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging && !currentTouch && gameRunning) {
-                const element = document.elementFromPoint(e.clientX, e.clientY);
-                if (element && element.classList.contains('tsum')) {
-                    continueDrag({ target: element });
-                }
-            }
-        });
-
-        // ページ読み込み時の初期化
-        window.addEventListener('load', () => {
             initializeBoard();
-            updatePowerUps();
-            
-            // 実績の読み込み
-            const savedAchievements = localStorage.getItem('tsumAchievements');
-            if (savedAchievements) {
-                achievements = new Set(JSON.parse(savedAchievements));
-                achievements.forEach(achievement => {
-                    const elem = document.querySelector(`[data-achievement="${achievement}"]`);
-                    if (elem) {
-                        elem.classList.add('unlocked');
-                    }
-                });
-            }
-            
-            setTimeout(() => {
-                showNotification('🎮 モバイル最適化ツムゲームへようこそ！');
-            }, 1000);
-        });
+        }
 
-        // 実績の永続化
-        window.addEventListener('beforeunload', () => {
-            localStorage.setItem('tsumAchievements', JSON.stringify([...achievements]));
-        });
-
-        // モバイル向けパフォーマンス最適化
-        let ticking = false;
-
-        function optimizedUpdate() {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    // 重い処理をここで実行
-                    ticking = false;
-                });
-                ticking = true;
+        // 実績管理
+        function loadAchievements() {
+            const saved = localStorage.getItem('tsumAchievements');
+            if (saved) {
+                achievements = new Set(JSON.parse(saved));
             }
         }
 
-        // スクロール無効化（ゲーム画面固定）
-        document.addEventListener('touchmove', (e) => {
-            if (e.target.closest('.game-board')) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+        function saveAchievements() {
+            localStorage.setItem('tsumAchievements', JSON.stringify([...achievements]));
+        }
 
-        // 画面サイズ変更対応
-        window.addEventListener('resize', () => {
-            if (gameRunning) {
-                // レスポンシブ調整
-                clearChainLines();
-            }
-        });
-
-        // Service Worker登録
+        // PWA関連
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => console.log('SW registered'))
-                .catch(error => console.log('SW registration failed'));
+                .then(registration => console.log('PWA ready'))
+                .catch(error => console.log('PWA failed'));
         }
 
-        // PWAインストールプロンプト
+        // インストールプロンプト
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
         });
 
-        // ホーム画面追加促進
-        function showInstallPrompt() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((result) => {
-                    deferredPrompt = null;
+        // フルスクリーン対応
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Fullscreen error: ${err.message}`);
                 });
+            } else {
+                document.exitFullscreen();
             }
         }
 
-        // 一定時間プレイ後にインストール促進
-        setTimeout(() => {
-            if (!window.matchMedia('(display-mode: standalone)').matches) {
-                showNotification('📱 ホーム画面に追加してアプリのように楽しもう！');
+        // 画面回転対応
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                if (gameRunning) {
+                    clearChainLines();
+                }
+            }, 500);
+        });
+
+        // バックグラウンド処理停止
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && gameRunning) {
+                // ゲームを一時停止
+                clearInterval(gameTimer);
+            } else if (!document.hidden && gameRunning) {
+                // ゲームを再開
+                gameTimer = setInterval(updateTimer, 1000);
             }
-        }, 60000);
+        });
+
+        // デバッグ用（開発時のみ）
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            window.debugGame = {
+                addScore: (points) => addScore(points),
+                levelUp: () => levelUp(),
+                addPowerUp: (type, count) => {
+                    powerUps[type] += count;
+                    updatePowerUps();
+                }
+            };
+        }
+
+        // 長押し防止
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
+        // 拡大防止
+        document.addEventListener('gesturestart', e => e.preventDefault());
+        document.addEventListener('gesturechange', e => e.preventDefault());
+        document.addEventListener('gestureend', e => e.preventDefault());
+        
+        // スワイプ無効化
+        let startY;
+        document.addEventListener('touchstart', e => {
+            startY = e.touches[0].clientY;
+        });
+        
+        document.addEventListener('touchmove', e => {
+            const y = e.touches[0].clientY;
+            if (!e.target.closest('.game-board') && Math.abs(y - startY) > 10) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     </script>
 </body>
 </html>
