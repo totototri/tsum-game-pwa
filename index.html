@@ -1,4 +1,796 @@
-const x1 = rect1.left - boardRect.left + rect1.width / 2;
+📝 index.html に貼り付けるコード全文
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+    <title>ツムゲーム</title>
+    
+    <!-- PWA設定 -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ツムゲーム">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- アイコン設定 -->
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iMjAiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxjaXJjbGUgY3g9IjkwIiBjeT0iOTAiIHI9IjQwIiBmaWxsPSIjZmZlYjNiIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MF9saW5lYXJfMV8xIiB4MT0iMCIgeTE9IjAiIHgyPSIxODAiIHkyPSIxODAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzY2N2VlYSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3NjRiYTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Fredoka One', cursive;
+            color: white;
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh; /* 動的ビューポートハイト対応 */
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 6px;
+            min-height: 0;
+            gap: 6px;
+            max-height: calc(100vh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0));
+            max-height: calc(100dvh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0));
+        }
+
+        .top-ui {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+
+        .score-timer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .score {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .timer {
+            font-size: 14px;
+            color: #ffeb3b;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .timer.urgent {
+            color: #ff4757;
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .level-combo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .level-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .combo-info {
+            color: #4ecdc4;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .game-board {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 2px;
+            padding: 6px;
+            width: 100%;
+            max-width: 340px;
+            height: 100%;
+            max-height: calc(340px * 9 / 6);
+        }
+
+        .tsum {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: clamp(14px, 4vw, 20px);
+            transition: all 0.1s ease-out;
+            position: relative;
+            cursor: pointer;
+            will-change: transform;
+        }
+
+        .tsum:active {
+            transform: scale(0.9);
+        }
+
+        .tsum.selected {
+            border-color: #ffeb3b;
+            border-width: 3px;
+            transform: scale(1.15);
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.8);
+            z-index: 10;
+        }
+
+        .tsum.eliminating {
+            animation: pop 0.3s ease-in-out forwards;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .tsum.spawning {
+            animation: spawn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: scale(0);
+        }
+
+        @keyframes spawn {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* ツムの色 */
+        .red { background: linear-gradient(135deg, #ff6b6b, #ee5a52); color: white; }
+        .blue { background: linear-gradient(135deg, #4834d4, #3742fa); color: white; }
+        .green { background: linear-gradient(135deg, #26de81, #20bf6b); color: white; }
+        .yellow { background: linear-gradient(135deg, #fed330, #f7b731); color: #2c2c54; }
+        .purple { background: linear-gradient(135deg, #a55eea, #8854d0); color: white; }
+        .orange { background: linear-gradient(135deg, #fd9644, #f8b500); color: white; }
+        .pink { background: linear-gradient(135deg, #fd79a8, #e84393); color: white; }
+
+        .special {
+            background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700) !important;
+            animation: sparkle 1.5s ease-in-out infinite, rainbow 3s ease-in-out infinite;
+            border-color: #ffd700 !important;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+        }
+
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .chain-line {
+            position: absolute;
+            background: linear-gradient(90deg, #ffeb3b, #ff6b6b);
+            height: 4px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.8;
+        }
+
+        .bottom-ui {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+
+        .power-ups {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 8px;
+        }
+
+        .power-up {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: 2px solid white;
+            border-radius: 10px;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 9px;
+            text-align: center;
+            min-width: 50px;
+            touch-action: manipulation;
+        }
+
+        .power-up:active {
+            transform: scale(0.9);
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+        }
+
+        .power-up.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border: 2px solid white;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'Fredoka One', cursive;
+            transition: all 0.2s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            touch-action: manipulation;
+            flex: 1;
+            max-width: 100px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+        }
+
+        .floating-score {
+            position: absolute;
+            color: #ffeb3b;
+            font-size: 16px;
+            font-weight: bold;
+            animation: floatUp 1s ease-out forwards;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(1.2) translateY(-50px); opacity: 0; }
+        }
+
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: notificationPop 2s ease-in-out forwards;
+            max-width: 80%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        @keyframes notificationPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            15% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            85% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+
+        .chain-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 50;
+        }
+
+        .achievements {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 200;
+        }
+
+        .achievement {
+            background: rgba(255, 215, 0, 0.9);
+            color: #2c2c54;
+            border-radius: 8px;
+            padding: 3px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .achievement.show {
+            opacity: 1;
+            transform: translateY(0);
+            animation: achievementBounce 0.6s ease-out;
+        }
+
+        @keyframes achievementBounce {
+            0% { transform: translateY(20px) scale(0.8); }
+            50% { transform: translateY(-5px) scale(1.1); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        /* フルスクリーンゲーム向け調整 */
+        @media (max-height: 700px) {
+            .game-container {
+                gap: 4px;
+                padding: 4px;
+            }
+            
+            .top-ui, .bottom-ui {
+                padding: 6px;
+            }
+            
+            .score {
+                font-size: 16px;
+            }
+            
+            .power-ups {
+                margin-bottom: 6px;
+            }
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .level-badge, .combo-info {
+                font-size: 10px;
+            }
+            
+            .timer {
+                font-size: 12px;
+            }
+            
+            .power-up {
+                font-size: 8px;
+                padding: 4px;
+                min-width: 45px;
+            }
+            
+            .board-grid {
+                gap: 1px;
+                padding: 4px;
+            }
+        }
+
+        @media (max-width: 350px) {
+            .tsum {
+                font-size: 14px;
+            }
+            
+            .board-grid {
+                gap: 1px;
+                padding: 4px;
+                max-width: 300px;
+            }
+        }
+
+        /* ローディング画面 */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">🎮 ツムゲーム読み込み中...</div>
+    </div>
+
+    <div class="game-container">
+        <div class="top-ui">
+            <div class="score-timer">
+                <div class="score">スコア: <span id="score">0</span></div>
+                <div class="timer" id="timerDisplay">残り: <span id="timer">60</span>秒</div>
+            </div>
+            <div class="level-combo">
+                <div class="level-badge">Lv.<span id="level">1</span></div>
+                <div class="combo-info"><span id="combo">0</span>コンボ</div>
+            </div>
+        </div>
+
+        <div class="game-board" id="gameBoard">
+            <div class="chain-counter" id="chainCounter" style="display: none;">
+                <span id="chainCount">0</span>チェーン
+            </div>
+            <div class="board-grid" id="boardGrid"></div>
+        </div>
+
+        <div class="bottom-ui">
+            <div class="power-ups">
+                <div class="power-up" onclick="usePowerUp('bomb')" id="bombPower">
+                    💣<br>ボム<br><span id="bombCount">3</span>
+                </div>
+                <div class="power-up" onclick="usePowerUp('rainbow')" id="rainbowPower">
+                    🌈<br>虹<br><span id="rainbowCount">2</span>
+                </div>
+                <div class="power-up" onclick="usePowerUp('time')" id="timePower">
+                    ⏰<br>時間<br><span id="timeCount">1</span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" onclick="startGame()" id="startBtn">開始</button>
+                <button class="btn" onclick="resetGame()">リセット</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="achievements" id="achievementDisplay"></div>
+
+    <script>
+        // ゲーム状態
+        let score = 0;
+        let timeLeft = 60;
+        let gameRunning = false;
+        let gameTimer;
+        let selectedTsums = [];
+        let isDragging = false;
+        let tsums = [];
+        let level = 1;
+        let combo = 0;
+        let chainCount = 0;
+        let powerUps = { bomb: 3, rainbow: 2, time: 1 };
+        let achievements = new Set();
+        let gameStartTime = 0;
+        let perfectGame = true;
+        let currentTouch = null;
+        let boardSize = { rows: 9, cols: 6 };
+        
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink'];
+        const colorEmojis = { 
+            red: '🔴', blue: '🔵', green: '🟢', yellow: '🟡', 
+            purple: '🟣', orange: '🟠', pink: '🩷'
+        };
+
+        const achievementList = [
+            { id: 'firstPlay', name: '初プレイ', icon: '🎮' },
+            { id: 'score1000', name: '1000点達成', icon: '⭐' },
+            { id: 'score5000', name: '5000点達成', icon: '🌟' },
+            { id: 'combo10', name: '10コンボ', icon: '🔥' },
+            { id: 'speedDemon', name: '高速クリア', icon: '⚡' },
+            { id: 'perfectGame', name: '完璧プレイ', icon: '👑' }
+        ];
+
+        // 初期化とローディング
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                initializeBoard();
+                updatePowerUps();
+                loadAchievements();
+                showNotification('🎮 タッチでツムを繋げよう！');
+            }, 1500);
+        });
+
+        // ボード初期化
+        function initializeBoard() {
+            const boardGrid = document.getElementById('boardGrid');
+            boardGrid.innerHTML = '';
+            tsums = [];
+
+            for (let i = 0; i < boardSize.rows * boardSize.cols; i++) {
+                const color = colors[Math.floor(Math.random() * Math.min(5 + level, colors.length))];
+                const isSpecial = Math.random() < 0.04 + (level * 0.01);
+                const tsum = createTsum(color, isSpecial, i);
+                boardGrid.appendChild(tsum);
+                tsums.push(tsum);
+            }
+        }
+
+        // ツム作成
+        function createTsum(color, isSpecial = false, index) {
+            const tsum = document.createElement('div');
+            tsum.className = `tsum ${color}${isSpecial ? ' special' : ''}`;
+            tsum.textContent = isSpecial ? '💎' : colorEmojis[color];
+            tsum.dataset.color = color;
+            tsum.dataset.special = isSpecial;
+            tsum.dataset.index = index;
+            tsum.dataset.id = Date.now() + Math.random();
+
+            // タッチイベント
+            tsum.addEventListener('touchstart', handleTouchStart, { passive: false });
+            tsum.addEventListener('mousedown', handleMouseStart, { passive: false });
+
+            return tsum;
+        }
+
+        // タッチ開始
+        function handleTouchStart(e) {
+            if (!gameRunning) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            currentTouch = e.touches[0];
+            startDrag(e.target);
+            
+            // グローバルタッチイベント
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+            document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+        }
+
+        // タッチ移動
+        function handleTouchMove(e) {
+            if (!isDragging || !gameRunning || !currentTouch) return;
+            
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            if (element && element.classList.contains('tsum')) {
+                continueDrag(element);
+            }
+        }
+
+        // タッチ終了
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+            document.removeEventListener('touchcancel', handleTouchEnd);
+            
+            currentTouch = null;
+            endDrag();
+        }
+
+        // マウス開始（PC用）
+        function handleMouseStart(e) {
+            if (!gameRunning || currentTouch) return;
+            
+            e.preventDefault();
+            startDrag(e.target);
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseEnd);
+        }
+
+        function handleMouseMove(e) {
+            if (!isDragging || currentTouch) return;
+            
+            const element = document.elementFromPoint(e.clientX, e.clientY);
+            if (element && element.classList.contains('tsum')) {
+                continueDrag(element);
+            }
+        }
+
+        function handleMouseEnd(e) {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseEnd);
+            
+            if (!currentTouch) {
+                endDrag();
+            }
+        }
+
+        // ドラッグ開始
+        function startDrag(target) {
+            if (!gameRunning) return;
+            
+            isDragging = true;
+            selectedTsums = [target];
+            target.classList.add('selected');
+            chainCount = 1;
+            updateChainDisplay();
+            
+            // 触覚フィードバック
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        }
+
+        // ドラッグ継続
+        function continueDrag(target) {
+            if (!isDragging || !gameRunning) return;
+            
+            const lastSelected = selectedTsums[selectedTsums.length - 1];
+            
+            if (target === lastSelected) return;
+            
+            // 既に選択済みの場合、戻る処理
+            const existingIndex = selectedTsums.indexOf(target);
+            if (existingIndex !== -1 && existingIndex === selectedTsums.length - 2) {
+                // 1つ前に戻る
+                const removed = selectedTsums.pop();
+                removed.classList.remove('selected');
+                chainCount--;
+                updateChainDisplay();
+                clearChainLines();
+                drawChainLines();
+                return;
+            }
+            
+            if (target.dataset.color === lastSelected.dataset.color && 
+                !selectedTsums.includes(target) && 
+                isAdjacent(lastSelected, target)) {
+                selectedTsums.push(target);
+                target.classList.add('selected');
+                chainCount++;
+                updateChainDisplay();
+                drawChainLines();
+                
+                // 軽い振動
+                if (navigator.vibrate) {
+                    navigator.vibrate(15);
+                }
+            }
+        }
+
+        // ドラッグ終了
+        function endDrag() {
+            if (!isDragging || !gameRunning) return;
+            
+            isDragging = false;
+            document.getElementById('chainCounter').style.display = 'none';
+            clearChainLines();
+            
+            if (selectedTsums.length >= 3) {
+                eliminateTsums();
+                const points = calculatePoints();
+                
+                // ランダムボーナス
+                let finalPoints = points;
+                if (Math.random() < 0.12) {
+                    const bonus = Math.floor(Math.random() * 800) + 200;
+                    finalPoints += bonus;
+                    showNotification(`🎁 ボーナス！ +${bonus}点！`);
+                }
+                
+                addScore(finalPoints);
+                updateCombo();
+                checkAchievements();
+                
+                // 強い振動
+                if (navigator.vibrate) {
+                    navigator.vibrate([80, 40, 80]);
+                }
+                
+                if (score > level * 1500) {
+                    levelUp();
+                }
+            } else {
+                combo = 0;
+                perfectGame = false;
+                updateCombo();
+            }
+            
+            clearSelection();
+        }
+
+        // 隣接判定
+        function isAdjacent(tsum1, tsum2) {
+            const index1 = parseInt(tsum1.dataset.index);
+            const index2 = parseInt(tsum2.dataset.index);
+            
+            const row1 = Math.floor(index1 / boardSize.cols);
+            const col1 = index1 % boardSize.cols;
+            const row2 = Math.floor(index2 / boardSize.cols);
+            const col2 = index2 % boardSize.cols;
+            
+            const rowDiff = Math.abs(row1 - row2);
+            const colDiff = Math.abs(col1 - col2);
+            
+            return (rowDiff <= 1 && colDiff <= 1) && !(rowDiff === 0 && colDiff === 0);
+        }
+
+        // チェーンライン描画
+        function drawChainLines() {
+            clearChainLines();
+            
+            for (let i = 0; i < selectedTsums.length - 1; i++) {
+                const current = selectedTsums[i];
+                const next = selectedTsums[i + 1];
+                
+                const rect1 = current.getBoundingClientRect();
+                const rect2 = next.getBoundingClientRect();
+                const boardRect = document.getElementById('gameBoard').getBoundingClientRect();
+                const x1 = rect1.left - boardRect.left + rect1.width / 2;
                const y1 = rect1.top - boardRect.top + rect1.height / 2;
                const x2 = rect2.left - boardRect.left + rect2.width / 2;
                const y2 = rect2.top - boardRect.top + rect2.height / 2;
@@ -496,3 +1288,5 @@ const x1 = rect1.left - boardRect.left + rect1.width / 2;
    </script>
 </body>
 </html>
+                const x1 = rect1.left - boardRect.left +
+
