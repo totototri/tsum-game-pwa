@@ -1,5 +1,5 @@
-# index.htmlを作成
-cat > index.html << 'EOF'
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -13,7 +13,6 @@ cat > index.html << 'EOF'
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ツムゲーム">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         body {
             margin: 0;
@@ -26,6 +25,7 @@ cat > index.html << 'EOF'
             flex-direction: column;
             align-items: center;
         }
+
         .game-container {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
@@ -33,19 +33,23 @@ cat > index.html << 'EOF'
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .score {
             font-size: 24px;
             font-weight: bold;
             margin: 10px;
         }
+
         .timer {
             font-size: 18px;
             color: #ffeb3b;
         }
+
         .game-board {
             width: 320px;
             height: 480px;
@@ -55,6 +59,7 @@ cat > index.html << 'EOF'
             position: relative;
             overflow: hidden;
         }
+
         .tsum {
             width: 50px;
             height: 50px;
@@ -70,34 +75,30 @@ cat > index.html << 'EOF'
             transition: all 0.2s ease;
             user-select: none;
         }
+
         .tsum:hover {
             transform: scale(1.1);
             border-color: white;
         }
+
         .tsum.selected {
             border-color: #ffeb3b;
             border-width: 4px;
             transform: scale(1.15);
             box-shadow: 0 0 20px rgba(255, 235, 59, 0.5);
         }
+
         .tsum.red { background: #f44336; color: white; }
         .tsum.blue { background: #2196f3; color: white; }
         .tsum.green { background: #4caf50; color: white; }
         .tsum.yellow { background: #ffeb3b; color: black; }
         .tsum.purple { background: #9c27b0; color: white; }
-        .chain-line {
-            position: absolute;
-            background: #ffeb3b;
-            height: 3px;
-            border-radius: 2px;
-            pointer-events: none;
-            z-index: 100;
-            box-shadow: 0 0 10px rgba(255, 235, 59, 0.8);
-        }
+
         .controls {
             margin-top: 20px;
             text-align: center;
         }
+
         .btn {
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid white;
@@ -109,40 +110,17 @@ cat > index.html << 'EOF'
             margin: 5px;
             transition: all 0.3s ease;
         }
+
         .btn:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
         }
+
         .instructions {
             margin-top: 15px;
             font-size: 14px;
             text-align: center;
             opacity: 0.8;
-        }
-        .effect {
-            position: absolute;
-            font-size: 20px;
-            font-weight: bold;
-            color: #ffeb3b;
-            pointer-events: none;
-            animation: scoreEffect 1s ease-out;
-        }
-        @keyframes scoreEffect {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
-        }
-        .particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #ffeb3b;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: particle 0.8s ease-out forwards;
-        }
-        @keyframes particle {
-            0% { transform: scale(1) translateY(0); opacity: 1; }
-            100% { transform: scale(0) translateY(-30px); opacity: 0; }
         }
     </style>
 </head>
@@ -153,16 +131,20 @@ cat > index.html << 'EOF'
             <div class="score">スコア: <span id="score">0</span></div>
             <div class="timer">残り時間: <span id="timer">60</span>秒</div>
         </div>
+
         <div class="game-board" id="gameBoard"></div>
+
         <div class="controls">
             <button class="btn" onclick="startGame()">ゲーム開始</button>
             <button class="btn" onclick="resetGame()">リセット</button>
         </div>
+
         <div class="instructions">
             マウスでドラッグして同じ色のツムを繋げよう！<br>
             3個以上繋げると消えてスコアゲット！
         </div>
     </div>
+
     <script>
         let score = 0;
         let timeLeft = 60;
@@ -177,15 +159,17 @@ cat > index.html << 'EOF'
 
         function createTsum(x, y, color) {
             const tsum = document.createElement('div');
-            tsum.className = \`tsum \${color}\`;
+            tsum.className = `tsum ${color}`;
             tsum.style.left = x + 'px';
             tsum.style.top = y + 'px';
             tsum.textContent = colorEmojis[color];
             tsum.dataset.color = color;
             tsum.dataset.id = Date.now() + Math.random();
+
             tsum.addEventListener('mousedown', startDrag);
             tsum.addEventListener('mouseenter', continueDrag);
             tsum.addEventListener('mouseup', endDrag);
+
             return tsum;
         }
 
@@ -193,6 +177,7 @@ cat > index.html << 'EOF'
             const board = document.getElementById('gameBoard');
             board.innerHTML = '';
             tsums = [];
+
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 6; col++) {
                     const x = col * 55 + 10;
@@ -207,6 +192,7 @@ cat > index.html << 'EOF'
 
         function startDrag(e) {
             if (!gameRunning) return;
+            
             isDragging = true;
             selectedTsums = [e.target];
             e.target.classList.add('selected');
@@ -214,28 +200,30 @@ cat > index.html << 'EOF'
 
         function continueDrag(e) {
             if (!isDragging || !gameRunning) return;
+            
             const tsum = e.target;
             const lastSelected = selectedTsums[selectedTsums.length - 1];
+            
             if (tsum.dataset.color === lastSelected.dataset.color && 
                 !selectedTsums.includes(tsum) && 
                 isAdjacent(lastSelected, tsum)) {
                 selectedTsums.push(tsum);
                 tsum.classList.add('selected');
-                drawChainLine();
             }
         }
 
         function endDrag() {
             if (!isDragging || !gameRunning) return;
+            
             isDragging = false;
+            
             if (selectedTsums.length >= 3) {
                 eliminateTsums();
                 const points = selectedTsums.length * 100;
                 score += points;
                 updateScore();
-                showScoreEffect(points);
-                createParticles();
             }
+            
             clearSelection();
         }
 
@@ -249,57 +237,30 @@ cat > index.html << 'EOF'
             return distance < 80;
         }
 
-        function drawChainLine() {
-            document.querySelectorAll('.chain-line').forEach(line => line.remove());
-            for (let i = 0; i < selectedTsums.length - 1; i++) {
-                const current = selectedTsums[i];
-                const next = selectedTsums[i + 1];
-                const rect1 = current.getBoundingClientRect();
-                const rect2 = next.getBoundingClientRect();
-                const board = document.getElementById('gameBoard').getBoundingClientRect();
-                const x1 = rect1.left - board.left + 25;
-                const y1 = rect1.top - board.top + 25;
-                const x2 = rect2.left - board.left + 25;
-                const y2 = rect2.top - board.top + 25;
-                const line = document.createElement('div');
-                line.className = 'chain-line';
-                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-                line.style.width = length + 'px';
-                line.style.left = x1 + 'px';
-                line.style.top = y1 + 'px';
-                line.style.transform = \`rotate(\${angle}deg)\`;
-                line.style.transformOrigin = '0 50%';
-                document.getElementById('gameBoard').appendChild(line);
-            }
-        }
-
         function eliminateTsums() {
             selectedTsums.forEach(tsum => {
-                tsum.style.animation = 'particle 0.5s ease-out forwards';
                 setTimeout(() => {
                     if (tsum.parentNode) {
                         tsum.parentNode.removeChild(tsum);
                     }
-                }, 500);
+                }, 100);
             });
+            
             setTimeout(() => {
                 fillEmptySpaces();
-            }, 600);
+            }, 200);
         }
 
         function fillEmptySpaces() {
             const board = document.getElementById('gameBoard');
+            
             selectedTsums.forEach(removedTsum => {
                 const x = parseInt(removedTsum.style.left);
                 const y = parseInt(removedTsum.style.top);
                 const color = colors[Math.floor(Math.random() * colors.length)];
-                const newTsum = createTsum(x, y - 300, color);
+                const newTsum = createTsum(x, y, color);
+                
                 board.appendChild(newTsum);
-                setTimeout(() => {
-                    newTsum.style.transition = 'top 0.5s ease-in';
-                    newTsum.style.top = y + 'px';
-                }, 50);
             });
         }
 
@@ -310,37 +271,6 @@ cat > index.html << 'EOF'
                 }
             });
             selectedTsums = [];
-            document.querySelectorAll('.chain-line').forEach(line => line.remove());
-        }
-
-        function showScoreEffect(points) {
-            const effect = document.createElement('div');
-            effect.className = 'effect';
-            effect.textContent = \`+\${points}\`;
-            effect.style.left = '50%';
-            effect.style.top = '50%';
-            effect.style.transform = 'translate(-50%, -50%)';
-            document.getElementById('gameBoard').appendChild(effect);
-            setTimeout(() => {
-                if (effect.parentNode) {
-                    effect.parentNode.removeChild(effect);
-                }
-            }, 1000);
-        }
-
-        function createParticles() {
-            for (let i = 0; i < 10; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 300 + 'px';
-                particle.style.top = Math.random() * 400 + 'px';
-                document.getElementById('gameBoard').appendChild(particle);
-                setTimeout(() => {
-                    if (particle.parentNode) {
-                        particle.parentNode.removeChild(particle);
-                    }
-                }, 800);
-            }
         }
 
         function updateScore() {
@@ -349,6 +279,7 @@ cat > index.html << 'EOF'
 
         function updateTimer() {
             document.getElementById('timer').textContent = timeLeft;
+            
             if (timeLeft <= 0) {
                 endGame();
             } else {
@@ -362,7 +293,9 @@ cat > index.html << 'EOF'
             timeLeft = 60;
             updateScore();
             updateTimer();
+            
             initializeBoard();
+            
             gameTimer = setInterval(updateTimer, 1000);
         }
 
@@ -370,7 +303,8 @@ cat > index.html << 'EOF'
             gameRunning = false;
             clearInterval(gameTimer);
             clearSelection();
-            alert(\`ゲーム終了！\\nスコア: \${score}点\`);
+            
+            alert(`ゲーム終了！\nスコア: ${score}点`);
         }
 
         function resetGame() {
@@ -381,40 +315,10 @@ cat > index.html << 'EOF'
             updateScore();
             updateTimer();
             clearSelection();
+            
             const board = document.getElementById('gameBoard');
             board.innerHTML = '';
         }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then((registration) => {
-                        console.log('Service Worker 登録成功:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('Service Worker 登録失敗:', error);
-                    });
-            });
-        }
-
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const installBtn = document.createElement('button');
-            installBtn.className = 'btn';
-            installBtn.textContent = '📱 アプリとしてインストール';
-            installBtn.onclick = async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const result = await deferredPrompt.userChoice;
-                    console.log('インストール結果:', result);
-                    deferredPrompt = null;
-                    installBtn.style.display = 'none';
-                }
-            };
-            document.querySelector('.controls').appendChild(installBtn);
-        });
 
         window.addEventListener('load', () => {
             initializeBoard();
@@ -425,30 +329,6 @@ cat > index.html << 'EOF'
                 endDrag();
             }
         });
-
-        document.addEventListener('touchstart', (e) => {
-            const touch = e.touches[0];
-            const element = document.elementFromPoint(touch.clientX, touch.clientY);
-            if (element && element.classList.contains('tsum')) {
-                startDrag({target: element});
-                e.preventDefault();
-            }
-        });
-
-        document.addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            const element = document.elementFromPoint(touch.clientX, touch.clientY);
-            if (element && element.classList.contains('tsum')) {
-                continueDrag({target: element});
-                e.preventDefault();
-            }
-        });
-
-        document.addEventListener('touchend', (e) => {
-            endDrag();
-            e.preventDefault();
-        });
     </script>
 </body>
 </html>
-EOF
