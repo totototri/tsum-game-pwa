@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
     <title>超中毒性ツムゲーム</title>
     
     <!-- PWA設定 -->
@@ -17,6 +17,10 @@
         
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         body {
@@ -30,97 +34,63 @@
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
-        }
-
-        .particles {
+            overscroll-behavior: none;
             position: fixed;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #ffeb3b;
-            border-radius: 50%;
-            animation: float 3s ease-out forwards;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-200px) scale(0); opacity: 0; }
         }
 
         .game-container {
             background: rgba(255, 255, 255, 0.15);
-            border-radius: 30px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 15px;
             backdrop-filter: blur(15px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-            margin: 20px;
-            position: relative;
-            animation: pulse 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); }
-            100% { box-shadow: 0 12px 60px rgba(255, 215, 0, 0.3); }
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            margin: 10px;
+            width: calc(100% - 20px);
+            max-width: 400px;
+            height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin: 5px 0;
         }
 
         .level-badge {
             background: linear-gradient(45deg, #ff6b6b, #ffd93d);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
             margin: 5px;
             display: inline-block;
-            animation: bounce 1s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
         }
 
         .score-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 10px 0;
+            margin: 8px 0;
+            font-size: 16px;
         }
 
         .score {
-            font-size: 28px;
+            font-size: 18px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            position: relative;
-        }
-
-        .score-burst {
-            position: absolute;
-            color: #ffeb3b;
-            font-size: 20px;
-            animation: scoreBurst 1s ease-out forwards;
-            pointer-events: none;
-        }
-
-        @keyframes scoreBurst {
-            0% { transform: scale(1) translateY(0); opacity: 1; }
-            100% { transform: scale(1.5) translateY(-30px); opacity: 0; }
         }
 
         .timer {
-            font-size: 18px;
+            font-size: 16px;
             color: #ffeb3b;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
@@ -137,91 +107,131 @@
 
         .combo-meter {
             background: rgba(0,0,0,0.3);
-            border-radius: 15px;
-            padding: 10px;
-            margin: 10px 0;
+            border-radius: 10px;
+            padding: 8px;
+            margin: 8px 0;
             text-align: center;
         }
 
         .combo-text {
-            font-size: 16px;
-            margin-bottom: 5px;
+            font-size: 14px;
+            margin-bottom: 4px;
         }
 
         .combo-bar {
             background: rgba(255,255,255,0.2);
-            height: 8px;
-            border-radius: 4px;
+            height: 6px;
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .combo-fill {
             height: 100%;
             background: linear-gradient(90deg, #ff6b6b, #ffd93d, #4ecdc4);
-            border-radius: 4px;
+            border-radius: 3px;
             transition: width 0.3s ease;
             width: 0%;
         }
 
+        .daily-challenge {
+            background: rgba(255, 0, 150, 0.2);
+            border: 2px solid #ff0096;
+            border-radius: 10px;
+            padding: 8px;
+            margin: 8px 0;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .power-ups {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .power-up {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: 2px solid white;
+            border-radius: 12px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 10px;
+            min-width: 50px;
+            text-align: center;
+            touch-action: manipulation;
+        }
+
+        .power-up:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+        }
+
+        .power-up.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
         .game-board {
-            width: 320px;
-            height: 480px;
+            flex: 1;
             background: rgba(255, 255, 255, 0.25);
-            border-radius: 20px;
-            padding: 10px;
+            border-radius: 15px;
+            padding: 8px;
             position: relative;
             overflow: hidden;
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.3);
+            touch-action: none;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tsum {
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             position: absolute;
-            cursor: pointer;
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 22px;
-            transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            user-select: none;
+            font-size: 18px;
+            transition: all 0.15s ease-out;
             z-index: 10;
+            touch-action: none;
+            cursor: pointer;
         }
 
-        .tsum:hover {
-            transform: scale(1.1) rotate(5deg);
-            border-color: white;
-            z-index: 20;
+        .tsum:active {
+            transform: scale(0.95);
         }
 
         .tsum.selected {
             border-color: #ffeb3b;
-            border-width: 4px;
-            transform: scale(1.2) rotate(10deg);
-            box-shadow: 0 0 25px rgba(255, 235, 59, 0.8);
+            border-width: 3px;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 235, 59, 0.8);
             z-index: 30;
         }
 
         .tsum.eliminating {
-            animation: eliminate 0.5s ease-in-out forwards;
+            animation: eliminate 0.4s ease-in-out forwards;
         }
 
         @keyframes eliminate {
             0% { transform: scale(1) rotate(0deg); opacity: 1; }
-            50% { transform: scale(1.3) rotate(180deg); opacity: 0.7; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.7; }
             100% { transform: scale(0) rotate(360deg); opacity: 0; }
         }
 
         .tsum.falling {
-            animation: fall 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            animation: fall 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
         @keyframes fall {
-            0% { transform: translateY(-100px) rotate(0deg); }
-            100% { transform: translateY(0) rotate(360deg); }
+            0% { transform: translateY(-80px) rotate(0deg); }
+            100% { transform: translateY(0) rotate(180deg); }
         }
 
         .tsum.red { background: linear-gradient(135deg, #ff6b6b, #ee5a52); color: white; }
@@ -244,41 +254,48 @@
         }
 
         @keyframes sparkle {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 1); }
+        }
+
+        .chain-line {
+            position: absolute;
+            background: linear-gradient(90deg, #ffeb3b, #ffd93d);
+            height: 4px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 8px rgba(255, 235, 59, 0.6);
         }
 
         .controls {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .btn {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
             border: 2px solid white;
             color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
+            padding: 12px 20px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-family: 'Fredoka One', cursive;
-            margin: 5px;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            margin: 4px;
+            transition: all 0.2s ease;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        .btn:hover {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            touch-action: manipulation;
         }
 
         .btn:active {
-            transform: translateY(-1px) scale(1.02);
+            transform: scale(0.95);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
         }
 
         .achievements {
-            margin-top: 15px;
+            margin-top: 10px;
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
@@ -286,11 +303,11 @@
 
         .achievement {
             background: rgba(255, 215, 0, 0.2);
-            border: 2px solid #ffd700;
-            border-radius: 20px;
-            padding: 5px 10px;
+            border: 1px solid #ffd700;
+            border-radius: 12px;
+            padding: 4px 8px;
             margin: 2px;
-            font-size: 12px;
+            font-size: 10px;
             opacity: 0.5;
             transition: all 0.3s ease;
         }
@@ -302,55 +319,27 @@
 
         @keyframes achievementPop {
             0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
+            50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
 
         .instructions {
-            margin-top: 15px;
-            font-size: 14px;
+            margin-top: 10px;
+            font-size: 12px;
             text-align: center;
             opacity: 0.9;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
-        .power-ups {
-            display: flex;
-            justify-content: center;
-            margin: 10px 0;
-        }
-
-        .power-up {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: 2px solid white;
-            border-radius: 15px;
-            padding: 8px;
-            margin: 0 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 12px;
-            min-width: 60px;
-        }
-
-        .power-up:hover {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .power-up.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .chain-display {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 10px;
-            padding: 5px 10px;
-            font-size: 14px;
-            z-index: 100;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            z-index: 200;
         }
 
         .notification {
@@ -359,51 +348,78 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, #ff6b6b, #ffd93d);
-            padding: 20px 30px;
-            border-radius: 15px;
-            font-size: 18px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 14px;
             z-index: 2000;
             animation: notificationSlide 2s ease-in-out forwards;
+            max-width: 80%;
+            text-align: center;
         }
 
         @keyframes notificationSlide {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            20% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            20% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
             80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
         }
 
-        .daily-challenge {
-            background: rgba(255, 0, 150, 0.2);
-            border: 2px solid #ff0096;
-            border-radius: 15px;
-            padding: 10px;
-            margin: 10px 0;
-            text-align: center;
+        .score-burst {
+            position: absolute;
+            color: #ffeb3b;
+            font-size: 16px;
+            animation: scoreBurst 1s ease-out forwards;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            font-weight: bold;
         }
 
-        @media (max-width: 480px) {
+        @keyframes scoreBurst {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(1.3) translateY(-40px); opacity: 0; }
+        }
+
+        /* タッチフィードバック最適化 */
+        .tsum:hover {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* パフォーマンス最適化 */
+        .game-board * {
+            will-change: transform;
+        }
+
+        /* レスポンシブ調整 */
+        @media (max-height: 700px) {
             .game-container {
-                margin: 10px;
-                padding: 15px;
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .daily-challenge,
+            .achievements {
+                display: none;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .tsum {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
             }
             
             .game-board {
-                width: 280px;
-                height: 420px;
-            }
-            
-            .tsum {
-                width: 45px;
-                height: 45px;
-                font-size: 20px;
+                padding: 6px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    
     <div class="game-container">
         <div class="header">
             <h1>🎮 超中毒性ツムゲーム</h1>
@@ -460,7 +476,7 @@
         </div>
 
         <div class="instructions">
-            マウスでドラッグして同じ色のツムを繋げよう！<br>
+            指でドラッグして同じ色のツムを繋げよう！<br>
             💎 特殊ツムでボーナス点！ 🔥 コンボでスコア倍増！
         </div>
     </div>
@@ -481,6 +497,7 @@
         let dailyChallengeCompleted = false;
         let gameStartTime = 0;
         let perfectGame = true;
+        let currentTouch = null;
         
         const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink'];
         const colorEmojis = { 
@@ -488,7 +505,6 @@
             purple: '🟣', orange: '🟠', pink: '🩷'
         };
 
-        // 中毒性メカニズム: ランダム報酬
         const bonusMessages = [
             "🎉 ボーナス！ +500点！",
             "⭐ 素晴らしい！ +300点！",
@@ -497,6 +513,7 @@
             "🚀 ロケット！ +800点！"
         ];
 
+        // モバイル最適化: タッチイベント処理
         function createTsum(x, y, color, isSpecial = false) {
             const tsum = document.createElement('div');
             tsum.className = `tsum ${color}${isSpecial ? ' special' : ''}`;
@@ -507,10 +524,9 @@
             tsum.dataset.special = isSpecial;
             tsum.dataset.id = Date.now() + Math.random();
 
+            // タッチイベント優先、マウスイベントは補助
+            tsum.addEventListener('touchstart', handleTouchStart, { passive: false });
             tsum.addEventListener('mousedown', startDrag);
-            tsum.addEventListener('mouseenter', continueDrag);
-            tsum.addEventListener('touchstart', startDrag);
-            tsum.addEventListener('touchmove', handleTouchMove);
 
             return tsum;
         }
@@ -520,16 +536,23 @@
             board.innerHTML = '<div class="chain-display" id="chainDisplay" style="display: none;">チェーン: <span id="chainCount">0</span></div>';
             tsums = [];
 
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 6; col++) {
-                    const x = col * 50 + 15;
-                    const y = row * 55 + 15;
+            // モバイル向けグリッド調整
+            const isMobile = window.innerWidth < 400;
+            const cols = 6;
+            const rows = isMobile ? 9 : 8;
+            const tsumSize = isMobile ? 40 : 44;
+            const spacing = isMobile ? 42 : 46;
+
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const x = col * spacing + 8;
+                    const y = row * spacing + 8;
                     const color = colors[Math.floor(Math.random() * Math.min(5 + level, colors.length))];
-                    const isSpecial = Math.random() < 0.05 + (level * 0.01); // レベルが上がると特殊ツム確率アップ
+                    const isSpecial = Math.random() < 0.05 + (level * 0.01);
                     const tsum = createTsum(x, y, color, isSpecial);
                     
                     tsum.classList.add('falling');
-                    setTimeout(() => tsum.classList.remove('falling'), 800);
+                    setTimeout(() => tsum.classList.remove('falling'), 600);
                     
                     board.appendChild(tsum);
                     tsums.push(tsum);
@@ -537,17 +560,58 @@
             }
         }
 
-        function startDrag(e) {
+        // 改良されたタッチハンドリング
+        function handleTouchStart(e) {
             if (!gameRunning) return;
             
             e.preventDefault();
+            e.stopPropagation();
+            
+            currentTouch = e.touches[0];
+            startDrag({ target: e.target });
+            
+            // タッチムーブとタッチエンドのリスナーを動的に追加
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
+
+        function handleTouchMove(e) {
+            if (!isDragging || !gameRunning || !currentTouch) return;
+            
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            if (element && element.classList.contains('tsum')) {
+                continueDrag({ target: element });
+            }
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            
+            // リスナーを削除
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+            
+            currentTouch = null;
+            endDrag();
+        }
+
+        function startDrag(e) {
+            if (!gameRunning) return;
+            
             isDragging = true;
             selectedTsums = [e.target];
             e.target.classList.add('selected');
             chainCount = 1;
             updateChainDisplay();
             
-            createParticles(e.target.getBoundingClientRect().left, e.target.getBoundingClientRect().top);
+            // 触覚フィードバック（可能な場合）
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         }
 
         function continueDrag(e) {
@@ -556,6 +620,8 @@
             const tsum = e.target;
             const lastSelected = selectedTsums[selectedTsums.length - 1];
             
+            if (tsum === lastSelected) return;
+            
             if (tsum.dataset.color === lastSelected.dataset.color && 
                 !selectedTsums.includes(tsum) && 
                 isAdjacent(lastSelected, tsum)) {
@@ -563,25 +629,12 @@
                 tsum.classList.add('selected');
                 chainCount++;
                 updateChainDisplay();
+                drawChainLine();
                 
-                createParticles(tsum.getBoundingClientRect().left, tsum.getBoundingClientRect().top);
-                
-                // 音効果の代替（視覚効果）
-                tsum.style.transform = 'scale(1.3) rotate(15deg)';
-                setTimeout(() => {
-                    if (tsum.parentNode) {
-                        tsum.style.transform = '';
-                    }
-                }, 100);
-            }
-        }
-
-        function handleTouchMove(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const element = document.elementFromPoint(touch.clientX, touch.clientY);
-            if (element && element.classList.contains('tsum')) {
-                continueDrag({ target: element });
+                // 軽い振動フィードバック
+                if (navigator.vibrate) {
+                    navigator.vibrate(20);
+                }
             }
         }
 
@@ -590,12 +643,13 @@
             
             isDragging = false;
             document.getElementById('chainDisplay').style.display = 'none';
+            clearChainLines();
             
             if (selectedTsums.length >= 3) {
                 eliminateTsums();
                 let points = calculatePoints();
                 
-                // ランダムボーナス（中毒性メカニズム）
+                // ランダムボーナス
                 if (Math.random() < 0.15) {
                     const bonus = Math.floor(Math.random() * 1000) + 200;
                     points += bonus;
@@ -606,7 +660,11 @@
                 updateCombo();
                 checkAchievements();
                 
-                // レベルアップチェック
+                // 強い振動フィードバック
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                
                 if (score > level * 2000) {
                     levelUp();
                 }
@@ -617,6 +675,42 @@
             }
             
             clearSelection();
+        }
+
+        function drawChainLine() {
+            clearChainLines();
+            
+            for (let i = 0; i < selectedTsums.length - 1; i++) {
+                const current = selectedTsums[i];
+                const next = selectedTsums[i + 1];
+                
+                const rect1 = current.getBoundingClientRect();
+                const rect2 = next.getBoundingClientRect();
+                const board = document.getElementById('gameBoard').getBoundingClientRect();
+                
+                const x1 = rect1.left - board.left + 22;
+                const y1 = rect1.top - board.top + 22;
+                const x2 = rect2.left - board.left + 22;
+                const y2 = rect2.top - board.top + 22;
+                
+                const line = document.createElement('div');
+                line.className = 'chain-line';
+                
+                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                line.style.width = length + 'px';
+                line.style.left = x1 + 'px';
+                line.style.top = y1 + 'px';
+                line.style.transform = `rotate(${angle}deg)`;
+                line.style.transformOrigin = '0 50%';
+                
+                document.getElementById('gameBoard').appendChild(line);
+            }
+        }
+
+        function clearChainLines() {
+            document.querySelectorAll('.chain-line').forEach(line => line.remove());
         }
 
         function calculatePoints() {
@@ -631,8 +725,6 @@
         function addScore(points) {
             score += points;
             updateScore();
-            
-            // スコア表示アニメーション
             showScoreBurst(points);
         }
 
@@ -640,7 +732,7 @@
             const burst = document.createElement('div');
             burst.className = 'score-burst';
             burst.textContent = `+${points}`;
-            burst.style.left = Math.random() * 200 + 'px';
+            burst.style.left = Math.random() * 150 + 'px';
             burst.style.top = '0px';
             
             document.querySelector('.score').appendChild(burst);
@@ -656,19 +748,14 @@
             const comboFill = document.getElementById('comboFill');
             const percentage = Math.min((combo * 10), 100);
             comboFill.style.width = percentage + '%';
-            
-            if (combo >= 10) {
-                comboFill.style.background = 'linear-gradient(90deg, #ff6b6b, #ffd93d, #4ecdc4, #ff6b6b)';
-            }
         }
 
         function levelUp() {
             level++;
-            timeLeft += 15; // ボーナス時間
+            timeLeft += 15;
             showNotification(`🎉 レベル ${level} にアップ！ +15秒ボーナス！`);
             document.getElementById('level').textContent = level;
             
-            // 新しいパワーアップ追加
             powerUps.bomb += 1;
             powerUps.rainbow += level % 2;
             updatePowerUps();
@@ -680,9 +767,13 @@
             powerUps[type]--;
             updatePowerUps();
             
+            // 振動フィードバック
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+            
             switch(type) {
                 case 'bomb':
-                    // ランダムな場所のツムを大量消去
                     const randomTsums = tsums.sort(() => Math.random() - 0.5).slice(0, 12);
                     randomTsums.forEach(tsum => {
                         if (tsum.parentNode) {
@@ -691,14 +782,13 @@
                                 if (tsum.parentNode) {
                                     tsum.parentNode.removeChild(tsum);
                                 }
-                            }, 500);
+                            }, 400);
                         }
                     });
                     addScore(1200);
                     break;
                     
                 case 'rainbow':
-                    // 全ての色を統一
                     const dominantColor = colors[Math.floor(Math.random() * colors.length)];
                     tsums.forEach(tsum => {
                         if (tsum.parentNode && Math.random() < 0.3) {
@@ -761,19 +851,6 @@
             });
         }
 
-        function createParticles(x, y) {
-            for (let i = 0; i < 5; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = (x + Math.random() * 50) + 'px';
-                particle.style.top = (y + Math.random() * 50) + 'px';
-                particle.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
-                
-                document.getElementById('particles').appendChild(particle);
-                setTimeout(() => particle.remove(), 3000);
-            }
-        }
-
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.className = 'notification';
@@ -789,7 +866,7 @@
                 Math.pow(rect1.left - rect2.left, 2) + 
                 Math.pow(rect1.top - rect2.top, 2)
             );
-            return distance < 70;
+            return distance < 65; // モバイル向けに調整
         }
 
         function eliminateTsums() {
@@ -797,23 +874,18 @@
                 setTimeout(() => {
                     if (tsum.parentNode) {
                         tsum.classList.add('eliminating');
-                        createParticles(
-                            tsum.getBoundingClientRect().left, 
-                            tsum.getBoundingClientRect().top
-                        );
-                        
                         setTimeout(() => {
                             if (tsum.parentNode) {
                                 tsum.parentNode.removeChild(tsum);
                             }
-                        }, 500);
+                        }, 400);
                     }
-                }, index * 50);
+                }, index * 40);
             });
             
             setTimeout(() => {
                 fillEmptySpaces();
-            }, selectedTsums.length * 50 + 600);
+            }, selectedTsums.length * 40 + 500);
         }
 
         function fillEmptySpaces() {
@@ -826,11 +898,11 @@
                     const newTsum = createTsum(x, y, color, isSpecial);
                     
                     newTsum.classList.add('falling');
-                    setTimeout(() => newTsum.classList.remove('falling'), 800);
+                    setTimeout(() => newTsum.classList.remove('falling'), 600);
                     
                     document.getElementById('gameBoard').appendChild(newTsum);
                     tsums.push(newTsum);
-                }, index * 100);
+                }, index * 80);
             });
         }
 
@@ -851,7 +923,6 @@
         function updateTimer() {
             document.getElementById('timer').textContent = timeLeft;
             
-            // 残り時間が少ないときの緊急表示
             const timerElement = document.getElementById('timer');
             if (timeLeft <= 10) {
                 timerElement.parentElement.classList.add('urgent');
@@ -894,7 +965,6 @@
             
             gameTimer = setInterval(updateTimer, 1000);
             
-            // ランダムイベント開始
             setTimeout(randomEvent, Math.random() * 20000 + 10000);
             
             showNotification('🎮 ゲーム開始！頑張って！');
@@ -934,7 +1004,6 @@
             const randomEventFunc = events[Math.floor(Math.random() * events.length)];
             randomEventFunc();
             
-            // 次のランダムイベントをスケジュール
             setTimeout(randomEvent, Math.random() * 25000 + 15000);
         }
 
@@ -942,6 +1011,7 @@
             gameRunning = false;
             clearInterval(gameTimer);
             clearSelection();
+            clearChainLines();
             
             checkAchievements();
             
@@ -976,6 +1046,7 @@
             updateTimer();
             updateCombo();
             clearSelection();
+            clearChainLines();
             
             document.getElementById('level').textContent = level;
             document.getElementById('chainDisplay').style.display = 'none';
@@ -985,17 +1056,19 @@
             tsums = [];
         }
 
-        // タッチデバイス対応
-        document.addEventListener('touchend', (e) => {
-            if (isDragging) {
+        // マウスイベント（PC用補助）
+        document.addEventListener('mouseup', () => {
+            if (isDragging && !currentTouch) {
                 endDrag();
-                e.preventDefault();
             }
         });
 
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                endDrag();
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && !currentTouch && gameRunning) {
+                const element = document.elementFromPoint(e.clientX, e.clientY);
+                if (element && element.classList.contains('tsum')) {
+                    continueDrag({ target: element });
+                }
             }
         });
 
@@ -1004,7 +1077,7 @@
             initializeBoard();
             updatePowerUps();
             
-            // ローカルストレージから実績を読み込み
+            // 実績の読み込み
             const savedAchievements = localStorage.getItem('tsumAchievements');
             if (savedAchievements) {
                 achievements = new Set(JSON.parse(savedAchievements));
@@ -1016,9 +1089,8 @@
                 });
             }
             
-            // ウェルカムメッセージ
             setTimeout(() => {
-                showNotification('🎮 超中毒性ツムゲームへようこそ！');
+                showNotification('🎮 モバイル最適化ツムゲームへようこそ！');
             }, 1000);
         });
 
@@ -1027,22 +1099,64 @@
             localStorage.setItem('tsumAchievements', JSON.stringify([...achievements]));
         });
 
-        // バックグラウンドアニメーション
-        setInterval(() => {
-            if (!gameRunning) {
-                createParticles(
-                    Math.random() * window.innerWidth,
-                    Math.random() * window.innerHeight
-                );
-            }
-        }, 3000);
+        // モバイル向けパフォーマンス最適化
+        let ticking = false;
 
-        // Service Worker登録（PWA機能）
+        function optimizedUpdate() {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    // 重い処理をここで実行
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+
+        // スクロール無効化（ゲーム画面固定）
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.closest('.game-board')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // 画面サイズ変更対応
+        window.addEventListener('resize', () => {
+            if (gameRunning) {
+                // レスポンシブ調整
+                clearChainLines();
+            }
+        });
+
+        // Service Worker登録
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('/service-worker.js')
                 .then(registration => console.log('SW registered'))
                 .catch(error => console.log('SW registration failed'));
         }
+
+        // PWAインストールプロンプト
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        // ホーム画面追加促進
+        function showInstallPrompt() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // 一定時間プレイ後にインストール促進
+        setTimeout(() => {
+            if (!window.matchMedia('(display-mode: standalone)').matches) {
+                showNotification('📱 ホーム画面に追加してアプリのように楽しもう！');
+            }
+        }, 60000);
     </script>
 </body>
 </html>
