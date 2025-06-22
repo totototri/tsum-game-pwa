@@ -1,11 +1,9 @@
-
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ツムツム風プロトタイプ</title>
+    <title>超中毒性ツムゲーム</title>
     
     <!-- PWA設定 -->
     <meta name="theme-color" content="#667eea">
@@ -13,25 +11,65 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ツムゲーム">
     <link rel="manifest" href="manifest.json">
+    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Arial', sans-serif;
+            font-family: 'Fredoka One', cursive;
             color: white;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            animation: float 3s ease-out forwards;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-200px) scale(0); opacity: 0; }
         }
 
         .game-container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
             padding: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            margin: 20px;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); }
+            100% { box-shadow: 0 12px 60px rgba(255, 215, 0, 0.3); }
         }
 
         .header {
@@ -39,25 +77,101 @@
             margin-bottom: 20px;
         }
 
+        .level-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 5px;
+            display: inline-block;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .score-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+
         .score {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            margin: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .score-burst {
+            position: absolute;
+            color: #ffeb3b;
+            font-size: 20px;
+            animation: scoreBurst 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes scoreBurst {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(1.5) translateY(-30px); opacity: 0; }
         }
 
         .timer {
             font-size: 18px;
             color: #ffeb3b;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .timer.urgent {
+            color: #ff4757;
+            animation: flash 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes flash {
+            0% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        .combo-meter {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .combo-text {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .combo-bar {
+            background: rgba(255,255,255,0.2);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .combo-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #4ecdc4);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
         }
 
         .game-board {
             width: 320px;
             height: 480px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
             padding: 10px;
             position: relative;
             overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.3);
         }
 
         .tsum {
@@ -71,28 +185,68 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 20px;
-            transition: all 0.2s ease;
+            font-size: 22px;
+            transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             user-select: none;
+            z-index: 10;
         }
 
         .tsum:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(5deg);
             border-color: white;
+            z-index: 20;
         }
 
         .tsum.selected {
             border-color: #ffeb3b;
             border-width: 4px;
-            transform: scale(1.15);
-            box-shadow: 0 0 20px rgba(255, 235, 59, 0.5);
+            transform: scale(1.2) rotate(10deg);
+            box-shadow: 0 0 25px rgba(255, 235, 59, 0.8);
+            z-index: 30;
         }
 
-        .tsum.red { background: #f44336; color: white; }
-        .tsum.blue { background: #2196f3; color: white; }
-        .tsum.green { background: #4caf50; color: white; }
-        .tsum.yellow { background: #ffeb3b; color: black; }
-        .tsum.purple { background: #9c27b0; color: white; }
+        .tsum.eliminating {
+            animation: eliminate 0.5s ease-in-out forwards;
+        }
+
+        @keyframes eliminate {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.3) rotate(180deg); opacity: 0.7; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        .tsum.falling {
+            animation: fall 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+
+        .tsum.red { background: linear-gradient(135deg, #ff6b6b, #ee5a52); color: white; }
+        .tsum.blue { background: linear-gradient(135deg, #4834d4, #3742fa); color: white; }
+        .tsum.green { background: linear-gradient(135deg, #26de81, #20bf6b); color: white; }
+        .tsum.yellow { background: linear-gradient(135deg, #fed330, #f7b731); color: #2c2c54; }
+        .tsum.purple { background: linear-gradient(135deg, #a55eea, #8854d0); color: white; }
+        .tsum.orange { background: linear-gradient(135deg, #fd9644, #f8b500); color: white; }
+        .tsum.pink { background: linear-gradient(135deg, #fd79a8, #e84393); color: white; }
+
+        .tsum.special {
+            background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
+            animation: rainbow 2s ease-in-out infinite, sparkle 1s ease-in-out infinite;
+            border-color: #ffd700;
+        }
+
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+        }
 
         .controls {
             margin-top: 20px;
@@ -100,48 +254,214 @@
         }
 
         .btn {
-            background: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
             border: 2px solid white;
             color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 12px 24px;
+            border-radius: 30px;
             cursor: pointer;
             font-size: 16px;
+            font-family: 'Fredoka One', cursive;
             margin: 5px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .achievements {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .achievement {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 20px;
+            padding: 5px 10px;
+            margin: 2px;
+            font-size: 12px;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .achievement.unlocked {
+            opacity: 1;
+            animation: achievementPop 0.5s ease-out;
+        }
+
+        @keyframes achievementPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
 
         .instructions {
             margin-top: 15px;
             font-size: 14px;
             text-align: center;
-            opacity: 0.8;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .power-ups {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .power-up {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: 2px solid white;
+            border-radius: 15px;
+            padding: 8px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            min-width: 60px;
+        }
+
+        .power-up:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .power-up.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .chain-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 18px;
+            z-index: 2000;
+            animation: notificationSlide 2s ease-in-out forwards;
+        }
+
+        @keyframes notificationSlide {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+
+        .daily-challenge {
+            background: rgba(255, 0, 150, 0.2);
+            border: 2px solid #ff0096;
+            border-radius: 15px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .game-board {
+                width: 280px;
+                height: 420px;
+            }
+            
+            .tsum {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="particles" id="particles"></div>
+    
     <div class="game-container">
         <div class="header">
-            <h1>🎮 ツムツム風ゲーム</h1>
-            <div class="score">スコア: <span id="score">0</span></div>
-            <div class="timer">残り時間: <span id="timer">60</span>秒</div>
+            <h1>🎮 超中毒性ツムゲーム</h1>
+            <div class="level-badge">レベル <span id="level">1</span></div>
+            
+            <div class="score-container">
+                <div class="score">スコア: <span id="score">0</span></div>
+                <div class="timer">残り: <span id="timer">60</span>秒</div>
+            </div>
+            
+            <div class="combo-meter">
+                <div class="combo-text">コンボ: <span id="combo">0</span> 連鎖</div>
+                <div class="combo-bar">
+                    <div class="combo-fill" id="comboFill"></div>
+                </div>
+            </div>
+            
+            <div class="daily-challenge">
+                🏆 今日の挑戦: <span id="dailyChallenge">5000点達成！</span>
+                <div>報酬: ⭐️×3</div>
+            </div>
         </div>
 
-        <div class="game-board" id="gameBoard"></div>
+        <div class="power-ups">
+            <div class="power-up" onclick="usePowerUp('bomb')" id="bombPower">
+                💣<br>ボム<br><span id="bombCount">3</span>
+            </div>
+            <div class="power-up" onclick="usePowerUp('rainbow')" id="rainbowPower">
+                🌈<br>虹<br><span id="rainbowCount">2</span>
+            </div>
+            <div class="power-up" onclick="usePowerUp('time')" id="timePower">
+                ⏰<br>時間<br><span id="timeCount">1</span>
+            </div>
+        </div>
+
+        <div class="game-board" id="gameBoard">
+            <div class="chain-display" id="chainDisplay" style="display: none;">
+                チェーン: <span id="chainCount">0</span>
+            </div>
+        </div>
 
         <div class="controls">
             <button class="btn" onclick="startGame()">ゲーム開始</button>
             <button class="btn" onclick="resetGame()">リセット</button>
         </div>
 
+        <div class="achievements" id="achievements">
+            <div class="achievement" data-achievement="firstPlay">初プレイ 🎮</div>
+            <div class="achievement" data-achievement="score1000">1000点 ⭐</div>
+            <div class="achievement" data-achievement="score5000">5000点 🌟</div>
+            <div class="achievement" data-achievement="combo10">10コンボ 🔥</div>
+            <div class="achievement" data-achievement="speedDemon">高速プレイ ⚡</div>
+            <div class="achievement" data-achievement="perfectGame">完璧ゲーム 👑</div>
+        </div>
+
         <div class="instructions">
             マウスでドラッグして同じ色のツムを繋げよう！<br>
-            3個以上繋げると消えてスコアゲット！
+            💎 特殊ツムでボーナス点！ 🔥 コンボでスコア倍増！
         </div>
     </div>
 
@@ -153,37 +473,64 @@
         let selectedTsums = [];
         let isDragging = false;
         let tsums = [];
+        let level = 1;
+        let combo = 0;
+        let chainCount = 0;
+        let powerUps = { bomb: 3, rainbow: 2, time: 1 };
+        let achievements = new Set();
+        let dailyChallengeCompleted = false;
+        let gameStartTime = 0;
+        let perfectGame = true;
         
-        const colors = ['red', 'blue', 'green', 'yellow', 'purple'];
-        const colorEmojis = { red: '🔴', blue: '🔵', green: '🟢', yellow: '🟡', purple: '🟣' };
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink'];
+        const colorEmojis = { 
+            red: '🔴', blue: '🔵', green: '🟢', yellow: '🟡', 
+            purple: '🟣', orange: '🟠', pink: '🩷'
+        };
 
-        function createTsum(x, y, color) {
+        // 中毒性メカニズム: ランダム報酬
+        const bonusMessages = [
+            "🎉 ボーナス！ +500点！",
+            "⭐ 素晴らしい！ +300点！",
+            "🔥 熱い！ +200点！",
+            "💎 キラキラ！ +1000点！",
+            "🚀 ロケット！ +800点！"
+        ];
+
+        function createTsum(x, y, color, isSpecial = false) {
             const tsum = document.createElement('div');
-            tsum.className = `tsum ${color}`;
+            tsum.className = `tsum ${color}${isSpecial ? ' special' : ''}`;
             tsum.style.left = x + 'px';
             tsum.style.top = y + 'px';
-            tsum.textContent = colorEmojis[color];
+            tsum.textContent = isSpecial ? '💎' : colorEmojis[color];
             tsum.dataset.color = color;
+            tsum.dataset.special = isSpecial;
             tsum.dataset.id = Date.now() + Math.random();
 
             tsum.addEventListener('mousedown', startDrag);
             tsum.addEventListener('mouseenter', continueDrag);
-            tsum.addEventListener('mouseup', endDrag);
+            tsum.addEventListener('touchstart', startDrag);
+            tsum.addEventListener('touchmove', handleTouchMove);
 
             return tsum;
         }
 
         function initializeBoard() {
             const board = document.getElementById('gameBoard');
-            board.innerHTML = '';
+            board.innerHTML = '<div class="chain-display" id="chainDisplay" style="display: none;">チェーン: <span id="chainCount">0</span></div>';
             tsums = [];
 
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 6; col++) {
-                    const x = col * 55 + 10;
-                    const y = row * 55 + 10;
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    const tsum = createTsum(x, y, color);
+                    const x = col * 50 + 15;
+                    const y = row * 55 + 15;
+                    const color = colors[Math.floor(Math.random() * Math.min(5 + level, colors.length))];
+                    const isSpecial = Math.random() < 0.05 + (level * 0.01); // レベルが上がると特殊ツム確率アップ
+                    const tsum = createTsum(x, y, color, isSpecial);
+                    
+                    tsum.classList.add('falling');
+                    setTimeout(() => tsum.classList.remove('falling'), 800);
+                    
                     board.appendChild(tsum);
                     tsums.push(tsum);
                 }
@@ -193,9 +540,14 @@
         function startDrag(e) {
             if (!gameRunning) return;
             
+            e.preventDefault();
             isDragging = true;
             selectedTsums = [e.target];
             e.target.classList.add('selected');
+            chainCount = 1;
+            updateChainDisplay();
+            
+            createParticles(e.target.getBoundingClientRect().left, e.target.getBoundingClientRect().top);
         }
 
         function continueDrag(e) {
@@ -209,6 +561,27 @@
                 isAdjacent(lastSelected, tsum)) {
                 selectedTsums.push(tsum);
                 tsum.classList.add('selected');
+                chainCount++;
+                updateChainDisplay();
+                
+                createParticles(tsum.getBoundingClientRect().left, tsum.getBoundingClientRect().top);
+                
+                // 音効果の代替（視覚効果）
+                tsum.style.transform = 'scale(1.3) rotate(15deg)';
+                setTimeout(() => {
+                    if (tsum.parentNode) {
+                        tsum.style.transform = '';
+                    }
+                }, 100);
+            }
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (element && element.classList.contains('tsum')) {
+                continueDrag({ target: element });
             }
         }
 
@@ -216,15 +589,197 @@
             if (!isDragging || !gameRunning) return;
             
             isDragging = false;
+            document.getElementById('chainDisplay').style.display = 'none';
             
             if (selectedTsums.length >= 3) {
                 eliminateTsums();
-                const points = selectedTsums.length * 100;
-                score += points;
-                updateScore();
+                let points = calculatePoints();
+                
+                // ランダムボーナス（中毒性メカニズム）
+                if (Math.random() < 0.15) {
+                    const bonus = Math.floor(Math.random() * 1000) + 200;
+                    points += bonus;
+                    showNotification(bonusMessages[Math.floor(Math.random() * bonusMessages.length)]);
+                }
+                
+                addScore(points);
+                updateCombo();
+                checkAchievements();
+                
+                // レベルアップチェック
+                if (score > level * 2000) {
+                    levelUp();
+                }
+            } else {
+                combo = 0;
+                perfectGame = false;
+                updateCombo();
             }
             
             clearSelection();
+        }
+
+        function calculatePoints() {
+            let basePoints = selectedTsums.length * 100;
+            let specialBonus = selectedTsums.filter(t => t.dataset.special === 'true').length * 500;
+            let comboMultiplier = Math.floor(combo / 5) + 1;
+            let chainBonus = selectedTsums.length > 7 ? selectedTsums.length * 50 : 0;
+            
+            return (basePoints + specialBonus + chainBonus) * comboMultiplier;
+        }
+
+        function addScore(points) {
+            score += points;
+            updateScore();
+            
+            // スコア表示アニメーション
+            showScoreBurst(points);
+        }
+
+        function showScoreBurst(points) {
+            const burst = document.createElement('div');
+            burst.className = 'score-burst';
+            burst.textContent = `+${points}`;
+            burst.style.left = Math.random() * 200 + 'px';
+            burst.style.top = '0px';
+            
+            document.querySelector('.score').appendChild(burst);
+            setTimeout(() => burst.remove(), 1000);
+        }
+
+        function updateCombo() {
+            if (selectedTsums.length >= 3) {
+                combo++;
+            }
+            
+            document.getElementById('combo').textContent = combo;
+            const comboFill = document.getElementById('comboFill');
+            const percentage = Math.min((combo * 10), 100);
+            comboFill.style.width = percentage + '%';
+            
+            if (combo >= 10) {
+                comboFill.style.background = 'linear-gradient(90deg, #ff6b6b, #ffd93d, #4ecdc4, #ff6b6b)';
+            }
+        }
+
+        function levelUp() {
+            level++;
+            timeLeft += 15; // ボーナス時間
+            showNotification(`🎉 レベル ${level} にアップ！ +15秒ボーナス！`);
+            document.getElementById('level').textContent = level;
+            
+            // 新しいパワーアップ追加
+            powerUps.bomb += 1;
+            powerUps.rainbow += level % 2;
+            updatePowerUps();
+        }
+
+        function usePowerUp(type) {
+            if (!gameRunning || powerUps[type] <= 0) return;
+            
+            powerUps[type]--;
+            updatePowerUps();
+            
+            switch(type) {
+                case 'bomb':
+                    // ランダムな場所のツムを大量消去
+                    const randomTsums = tsums.sort(() => Math.random() - 0.5).slice(0, 12);
+                    randomTsums.forEach(tsum => {
+                        if (tsum.parentNode) {
+                            tsum.classList.add('eliminating');
+                            setTimeout(() => {
+                                if (tsum.parentNode) {
+                                    tsum.parentNode.removeChild(tsum);
+                                }
+                            }, 500);
+                        }
+                    });
+                    addScore(1200);
+                    break;
+                    
+                case 'rainbow':
+                    // 全ての色を統一
+                    const dominantColor = colors[Math.floor(Math.random() * colors.length)];
+                    tsums.forEach(tsum => {
+                        if (tsum.parentNode && Math.random() < 0.3) {
+                            tsum.dataset.color = dominantColor;
+                            tsum.className = `tsum ${dominantColor}`;
+                            tsum.textContent = colorEmojis[dominantColor];
+                        }
+                    });
+                    showNotification('🌈 レインボーパワー発動！');
+                    break;
+                    
+                case 'time':
+                    timeLeft += 20;
+                    showNotification('⏰ +20秒追加！');
+                    break;
+            }
+        }
+
+        function updatePowerUps() {
+            document.getElementById('bombCount').textContent = powerUps.bomb;
+            document.getElementById('rainbowCount').textContent = powerUps.rainbow;
+            document.getElementById('timeCount').textContent = powerUps.time;
+            
+            document.getElementById('bombPower').classList.toggle('disabled', powerUps.bomb <= 0);
+            document.getElementById('rainbowPower').classList.toggle('disabled', powerUps.rainbow <= 0);
+            document.getElementById('timePower').classList.toggle('disabled', powerUps.time <= 0);
+        }
+
+        function checkAchievements() {
+            const newAchievements = [];
+            
+            if (!achievements.has('firstPlay') && score > 0) {
+                newAchievements.push('firstPlay');
+            }
+            if (!achievements.has('score1000') && score >= 1000) {
+                newAchievements.push('score1000');
+            }
+            if (!achievements.has('score5000') && score >= 5000) {
+                newAchievements.push('score5000');
+                dailyChallengeCompleted = true;
+                showNotification('🏆 デイリーチャレンジ達成！⭐️×3獲得！');
+            }
+            if (!achievements.has('combo10') && combo >= 10) {
+                newAchievements.push('combo10');
+            }
+            if (!achievements.has('speedDemon') && (Date.now() - gameStartTime) < 30000 && score >= 2000) {
+                newAchievements.push('speedDemon');
+            }
+            if (!achievements.has('perfectGame') && perfectGame && score >= 3000) {
+                newAchievements.push('perfectGame');
+            }
+            
+            newAchievements.forEach(achievement => {
+                achievements.add(achievement);
+                const elem = document.querySelector(`[data-achievement="${achievement}"]`);
+                if (elem) {
+                    elem.classList.add('unlocked');
+                }
+                showNotification(`🏆 実績解除: ${elem.textContent}！`);
+            });
+        }
+
+        function createParticles(x, y) {
+            for (let i = 0; i < 5; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = (x + Math.random() * 50) + 'px';
+                particle.style.top = (y + Math.random() * 50) + 'px';
+                particle.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                
+                document.getElementById('particles').appendChild(particle);
+                setTimeout(() => particle.remove(), 3000);
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
         }
 
         function isAdjacent(tsum1, tsum2) {
@@ -234,33 +789,48 @@
                 Math.pow(rect1.left - rect2.left, 2) + 
                 Math.pow(rect1.top - rect2.top, 2)
             );
-            return distance < 80;
+            return distance < 70;
         }
 
         function eliminateTsums() {
-            selectedTsums.forEach(tsum => {
+            selectedTsums.forEach((tsum, index) => {
                 setTimeout(() => {
                     if (tsum.parentNode) {
-                        tsum.parentNode.removeChild(tsum);
+                        tsum.classList.add('eliminating');
+                        createParticles(
+                            tsum.getBoundingClientRect().left, 
+                            tsum.getBoundingClientRect().top
+                        );
+                        
+                        setTimeout(() => {
+                            if (tsum.parentNode) {
+                                tsum.parentNode.removeChild(tsum);
+                            }
+                        }, 500);
                     }
-                }, 100);
+                }, index * 50);
             });
             
             setTimeout(() => {
                 fillEmptySpaces();
-            }, 200);
+            }, selectedTsums.length * 50 + 600);
         }
 
         function fillEmptySpaces() {
-            const board = document.getElementById('gameBoard');
-            
-            selectedTsums.forEach(removedTsum => {
-                const x = parseInt(removedTsum.style.left);
-                const y = parseInt(removedTsum.style.top);
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                const newTsum = createTsum(x, y, color);
-                
-                board.appendChild(newTsum);
+            selectedTsums.forEach((removedTsum, index) => {
+                setTimeout(() => {
+                    const x = parseInt(removedTsum.style.left);
+                    const y = parseInt(removedTsum.style.top);
+                    const color = colors[Math.floor(Math.random() * Math.min(5 + level, colors.length))];
+                    const isSpecial = Math.random() < 0.08 + (level * 0.01);
+                    const newTsum = createTsum(x, y, color, isSpecial);
+                    
+                    newTsum.classList.add('falling');
+                    setTimeout(() => newTsum.classList.remove('falling'), 800);
+                    
+                    document.getElementById('gameBoard').appendChild(newTsum);
+                    tsums.push(newTsum);
+                }, index * 100);
             });
         }
 
@@ -271,14 +841,23 @@
                 }
             });
             selectedTsums = [];
+            chainCount = 0;
         }
 
         function updateScore() {
-            document.getElementById('score').textContent = score;
+            document.getElementById('score').textContent = score.toLocaleString();
         }
 
         function updateTimer() {
             document.getElementById('timer').textContent = timeLeft;
+            
+            // 残り時間が少ないときの緊急表示
+            const timerElement = document.getElementById('timer');
+            if (timeLeft <= 10) {
+                timerElement.parentElement.classList.add('urgent');
+            } else {
+                timerElement.parentElement.classList.remove('urgent');
+            }
             
             if (timeLeft <= 0) {
                 endGame();
@@ -287,16 +866,76 @@
             }
         }
 
+        function updateChainDisplay() {
+            const chainDisplay = document.getElementById('chainDisplay');
+            if (chainCount > 0) {
+                chainDisplay.style.display = 'block';
+                document.getElementById('chainCount').textContent = chainCount;
+            }
+        }
+
         function startGame() {
             gameRunning = true;
+            gameStartTime = Date.now();
             score = 0;
             timeLeft = 60;
+            combo = 0;
+            level = 1;
+            perfectGame = true;
+            
             updateScore();
             updateTimer();
+            updateCombo();
+            updatePowerUps();
+            
+            document.getElementById('level').textContent = level;
             
             initializeBoard();
             
             gameTimer = setInterval(updateTimer, 1000);
+            
+            // ランダムイベント開始
+            setTimeout(randomEvent, Math.random() * 20000 + 10000);
+            
+            showNotification('🎮 ゲーム開始！頑張って！');
+        }
+
+        function randomEvent() {
+            if (!gameRunning) return;
+            
+            const events = [
+                () => {
+                    timeLeft += 10;
+                    showNotification('🎁 サプライズ！+10秒ボーナス！');
+                },
+                () => {
+                    powerUps.bomb += 2;
+                    updatePowerUps();
+                    showNotification('💣 ボムが2個追加された！');
+                },
+                () => {
+                    const allTsums = document.querySelectorAll('.tsum');
+                    allTsums.forEach(tsum => {
+                        if (Math.random() < 0.2) {
+                            tsum.dataset.special = 'true';
+                            tsum.classList.add('special');
+                            tsum.textContent = '💎';
+                        }
+                    });
+                    showNotification('✨ 特殊ツムが大量発生！');
+                },
+                () => {
+                    const bonusScore = Math.floor(Math.random() * 1000) + 500;
+                    addScore(bonusScore);
+                    showNotification(`🌟 ラッキーボーナス！+${bonusScore}点！`);
+                }
+            ];
+            
+            const randomEventFunc = events[Math.floor(Math.random() * events.length)];
+            randomEventFunc();
+            
+            // 次のランダムイベントをスケジュール
+            setTimeout(randomEvent, Math.random() * 25000 + 15000);
         }
 
         function endGame() {
@@ -304,7 +943,24 @@
             clearInterval(gameTimer);
             clearSelection();
             
-            alert(`ゲーム終了！\nスコア: ${score}点`);
+            checkAchievements();
+            
+            let message = `🎮 ゲーム終了！\n`;
+            message += `📊 スコア: ${score.toLocaleString()}点\n`;
+            message += `🎯 レベル: ${level}\n`;
+            message += `🔥 最高コンボ: ${combo}\n`;
+            
+            if (dailyChallengeCompleted) {
+                message += `🏆 デイリーチャレンジ達成！\n`;
+            }
+            
+            message += `\n🔄 もう一度プレイしますか？`;
+            
+            setTimeout(() => {
+                if (confirm(message)) {
+                    startGame();
+                }
+            }, 1000);
         }
 
         function resetGame() {
@@ -312,16 +968,29 @@
             clearInterval(gameTimer);
             score = 0;
             timeLeft = 60;
+            combo = 0;
+            level = 1;
+            chainCount = 0;
+            
             updateScore();
             updateTimer();
+            updateCombo();
             clearSelection();
             
+            document.getElementById('level').textContent = level;
+            document.getElementById('chainDisplay').style.display = 'none';
+            
             const board = document.getElementById('gameBoard');
-            board.innerHTML = '';
+            board.innerHTML = '<div class="chain-display" id="chainDisplay" style="display: none;">チェーン: <span id="chainCount">0</span></div>';
+            tsums = [];
         }
 
-        window.addEventListener('load', () => {
-            initializeBoard();
+        // タッチデバイス対応
+        document.addEventListener('touchend', (e) => {
+            if (isDragging) {
+                endDrag();
+                e.preventDefault();
+            }
         });
 
         document.addEventListener('mouseup', () => {
@@ -329,6 +998,51 @@
                 endDrag();
             }
         });
+
+        // ページ読み込み時の初期化
+        window.addEventListener('load', () => {
+            initializeBoard();
+            updatePowerUps();
+            
+            // ローカルストレージから実績を読み込み
+            const savedAchievements = localStorage.getItem('tsumAchievements');
+            if (savedAchievements) {
+                achievements = new Set(JSON.parse(savedAchievements));
+                achievements.forEach(achievement => {
+                    const elem = document.querySelector(`[data-achievement="${achievement}"]`);
+                    if (elem) {
+                        elem.classList.add('unlocked');
+                    }
+                });
+            }
+            
+            // ウェルカムメッセージ
+            setTimeout(() => {
+                showNotification('🎮 超中毒性ツムゲームへようこそ！');
+            }, 1000);
+        });
+
+        // 実績の永続化
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('tsumAchievements', JSON.stringify([...achievements]));
+        });
+
+        // バックグラウンドアニメーション
+        setInterval(() => {
+            if (!gameRunning) {
+                createParticles(
+                    Math.random() * window.innerWidth,
+                    Math.random() * window.innerHeight
+                );
+            }
+        }, 3000);
+
+        // Service Worker登録（PWA機能）
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('SW registered'))
+                .catch(error => console.log('SW registration failed'));
+        }
     </script>
 </body>
 </html>
